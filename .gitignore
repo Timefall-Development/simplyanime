@@ -1,8 +1,6 @@
 .gradle/
 build/
-run/
-run-autotest/
-run-server/
+run*/
 out/
 .idea/
 *.iml
@@ -12,4 +10,3 @@ bin/
 references/
 *.log
 showcase/
-runs/

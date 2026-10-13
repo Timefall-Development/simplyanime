@@ -21,21 +21,9 @@ sourceSets {
             modIdentifier project.mod_id
         }
     }
-    // dev only test mod, never goes in the jar
-    autotest {
-        java.srcDir '../common/src/autotest/java'
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
-        runs {
-            modIdentifier 'simplyanime_autotest'
-        }
-    }
 }
 
 configurations {
-    autotestImplementation.extendsFrom implementation
-    autotestCompileOnly.extendsFrom compileOnly
-    autotestRuntimeOnly.extendsFrom runtimeOnly
     // mods the dev game needs, copied into the run's mods folder so they load like they would for a player
     devMods {
         canBeConsumed = false
@@ -43,24 +31,12 @@ configurations {
     }
 }
 
-def autotest = project.hasProperty('autotest')
-def clientRunDir = autotest ? 'run-autotest' : 'run'
-
 runs {
     configureEach {
         modSource project.sourceSets.main
     }
     client {
-        workingDirectory.set(project.file(clientRunDir))
-        // gradlew runClient -Pautotest -Pshaders=all -Peffect=sun,ea
-        if (autotest) {
-            systemProperty 'simplyanime.autotest', 'true'
-            systemProperty 'simplyanime.autotest.shaders', (project.findProperty('shaders') ?: '').toString()
-            systemProperty 'simplyanime.autotest.effect', (project.findProperty('effect') ?: '').toString()
-            systemProperty 'simplyanime.autotest.time', (project.findProperty('time') ?: '13200').toString()
-            modSource project.sourceSets.autotest
-            programArguments.addAll '--width', '1280', '--height', '720'
-        }
+        workingDirectory.set(project.file('run'))
     }
     server {
         workingDirectory.set(project.file('run-server'))
@@ -96,7 +72,7 @@ dependencies {
 
 tasks.register('prepareDevMods', Sync) {
     from configurations.devMods
-    into layout.projectDirectory.dir("${clientRunDir}/mods")
+    into layout.projectDirectory.dir('run/mods')
 }
 tasks.register('prepareServerMods', Sync) {
     from configurations.devMods
@@ -105,11 +81,6 @@ tasks.register('prepareServerMods', Sync) {
 }
 tasks.matching { it.name == 'runClient' }.configureEach {
     dependsOn 'prepareDevMods'
-    if (autotest) {
-        doFirst {
-            delete 'run-autotest/saves/autotest', 'run-autotest/screenshots'
-        }
-    }
 }
 tasks.matching { it.name == 'runServer' }.configureEach {
     dependsOn 'prepareServerMods'

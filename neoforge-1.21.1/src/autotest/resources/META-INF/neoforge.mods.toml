@@ -1,8 +1,0 @@
-modLoader = "javafml"
-loaderVersion = "[4,)"
-license = "All Rights Reserved"
-
-[[mods]]
-modId = "simplyanime_autotest"
-version = "0.0.0"
-displayName = "Simply Anime dev tests"

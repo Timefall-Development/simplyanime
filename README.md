@@ -51,25 +51,6 @@ NeoForge 1.21.1 (also loads on 1.21):
 - Simply Swords 1.70.2 or newer (and its own dependencies)
 - Fzzy Config 0.7.6 or newer
 
-## Layout
-
-```
-common/            everything that is the same on every version: weapons, abilities, effects, assets
-forge-1.20.1/      the Forge entry classes, its data files and the few 1.20.1 only classes
-neoforge-1.21.1/   the same for NeoForge 1.21.1
-```
-
-Each version folder is its own Gradle project and compiles `common` in with it. The shared code never
-touches a loader: `CommonEvents` and `SimplyAnimeClient` hold what happens on each event, and the entry
-class in each version folder (`SimplyAnimeForge`, `SimplyAnimeNeoForge`) only listens and calls in.
-What Minecraft itself changed between the two versions sits behind the `platform` package, which every
-version folder has with the same class names.
-
-Registration and networking go through Fzzy Config, so nothing here uses the Architectury API.
-
-A new weapon goes in `common`. A version folder only needs touching for its data files (recipes,
-advancements, tags) or when something needs a new entry in `platform`.
-
 ## Building
 
 Run Gradle from the version folder you want. It has to run on **Java 21** (the mod for 1.20.1 still
@@ -86,7 +67,6 @@ Then, inside `forge-1.20.1` or `neoforge-1.21.1`:
 ./gradlew build        # jar ends up in build/libs
 ./gradlew runClient    # dev client with Simply Swords and its dependencies
 ./gradlew runServer    # dev server, on Forge add -Pplain to leave the shader mods out
-./gradlew runClient -Pautotest -Pshaders=all    # casts everything under each pack in run-autotest/shaderpacks, saves screenshots
 ```
 
 The dependencies come from the Modrinth maven by version id (`gradle.properties`), because the builds

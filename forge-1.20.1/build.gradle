@@ -27,45 +27,11 @@ sourceSets {
         java.srcDir '../common/src/main/java'
         resources.srcDir '../common/src/main/resources'
     }
-    // dev only test mod, never goes in the jar
-    autotest {
-        java.srcDir '../common/src/autotest/java'
-        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
-        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
-    }
 }
 
 loom {
     forge {
         mixinConfig "simplyanime.mixins.json"
-    }
-    // gradlew runClient -Pautotest -Pshaders=all -Peffect=sun,ea
-    if (project.hasProperty('autotest')) {
-        mods {
-            simplyanime {
-                sourceSet sourceSets.main
-            }
-            simplyanime_autotest {
-                sourceSet sourceSets.autotest
-            }
-        }
-        runs {
-            client {
-                runDir 'run-autotest'
-                property 'simplyanime.autotest', 'true'
-                property 'simplyanime.autotest.shaders', (project.findProperty('shaders') ?: '').toString()
-                property 'simplyanime.autotest.effect', (project.findProperty('effect') ?: '').toString()
-                property 'simplyanime.autotest.time', (project.findProperty('time') ?: '13200').toString()
-                programArgs '--width', '1280', '--height', '720'
-            }
-        }
-    }
-}
-
-tasks.matching { it.name == 'runClient' && project.hasProperty('autotest') }.configureEach {
-    dependsOn 'autotestClasses'
-    doFirst {
-        delete 'run-autotest/saves/autotest', 'run-autotest/screenshots'
     }
 }
 

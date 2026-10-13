@@ -21,7 +21,7 @@ tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
 }
 
-// everything that isn't Forge or 1.20.1 specific lives in ../common
+// shared code is in ../common
 sourceSets {
     main {
         java.srcDir '../common/src/main/java'
@@ -57,7 +57,7 @@ dependencies {
         transitive = false
     }
 
-    // everything below is only so runClient boots with simply swords' own deps
+    // dev client only from here
     modRuntimeOnly "dev.architectury:architectury-forge:${project.architectury_api_version}"
     modRuntimeOnly "maven.modrinth:simply-tooltips:${project.simply_tooltips_version}"
     modRuntimeOnly "thedarkcolour:kfflang:${project.kotlinforforge_version}"
@@ -71,19 +71,16 @@ dependencies {
     forgeRuntimeLibrary "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2"
     modRuntimeOnly "com.github.ZsoltMolnarrr:TinyConfig:2.3.2"
 
-    // Better Combat in the dev client to test the weapons with it, never shipped
     modRuntimeOnly "maven.modrinth:better-combat:${project.better_combat_version}"
     modRuntimeOnly "maven.modrinth:playeranimator:${project.player_animator_version}"
     modRuntimeOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
     modRuntimeOnly "io.github.llamalad7:mixinextras-forge:0.4.1"
     forgeRuntimeLibrary "io.github.llamalad7:mixinextras-common:0.4.1"
 
-    // Oculus + Embeddium in the dev client to test the effects under shader packs, never shipped.
-    // -Pplain leaves them out, runServer needs that since they are client only
+    // shaders, -Pplain leaves them out (needed for runServer)
     if (!project.hasProperty('plain')) {
         modRuntimeOnly "maven.modrinth:oculus:${project.oculus_version}"
         modRuntimeOnly "maven.modrinth:embeddium:${project.embeddium_version}"
-        // bundled inside the Oculus jar, but the dev launcher doesn't unpack it
         forgeRuntimeLibrary "org.anarres:jcpp:1.4.14"
     }
 }

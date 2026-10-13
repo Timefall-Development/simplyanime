@@ -12,7 +12,7 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-// everything that isn't NeoForge or 1.21.1 specific lives in ../common
+// shared code is in ../common
 sourceSets {
     main {
         java.srcDir '../common/src/main/java'
@@ -24,7 +24,7 @@ sourceSets {
 }
 
 configurations {
-    // mods the dev game needs, copied into the run's mods folder so they load like they would for a player
+    // mods for the dev game, copied into run/mods
     devMods {
         canBeConsumed = false
         transitive = false
@@ -65,7 +65,7 @@ dependencies {
     devMods "maven.modrinth:fzzy-config:${project.fzzy_config_version}"
     devMods "maven.modrinth:architectury-api:${project.architectury_version}"
     devMods "maven.modrinth:kotlin-for-forge:${project.kotlinforforge_version}"
-    // sodium + iris to test the effects under shader packs
+    // shaders
     devMods "maven.modrinth:sodium:${project.sodium_version}"
     devMods "maven.modrinth:iris:${project.iris_version}"
 }
@@ -91,7 +91,7 @@ tasks.withType(ProcessResources).configureEach {
     filesMatching('META-INF/neoforge.mods.toml') {
         expand "version": project.version
     }
-    // the shared models are written for Forge, NeoForge renamed its two model extensions
+    // NeoForge renamed the model extensions
     filesMatching('assets/simplyanime/models/item/*.json') {
         filter { it.replace('"forge_data"', '"neoforge_data"').replace('forge:separate_transforms', 'neoforge:separate_transforms') }
     }

@@ -20,6 +20,20 @@
         "UNIQUE",
         "GREATAXE"
       ]
+    },
+    "simplyanime:elucidator": {
+      "theme": "elucidator",
+      "badges": [
+        "UNIQUE",
+        "LONGSWORD"
+      ]
+    },
+    "simplyanime:dark_repulser": {
+      "theme": "dark_repulser",
+      "badges": [
+        "UNIQUE",
+        "LONGSWORD"
+      ]
     }
   }
 }

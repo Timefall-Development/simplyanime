@@ -6,7 +6,7 @@ license = "All Rights Reserved"
 modId = "simplyanime"
 version = "${version}"
 displayName = "Simply Anime"
-authors = "Hussain"
+authors = "ghostedhype"
 description = '''
 More unique weapons for Simply Swords.
 '''

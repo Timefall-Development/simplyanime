@@ -1,0 +1,56 @@
+package net.ghostedhype.simplyanime.client.renderer;
+
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import net.ghostedhype.simplyanime.platform.ClientPlatform;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
+public final class VfxBuffer {
+
+    // the normal is written as it is, nothing lights these
+    private static final Matrix3f UP = new Matrix3f();
+
+    private final VertexConsumer consumer;
+    private final boolean textured;
+    private final boolean entity;
+    private final float gain;
+
+    private VfxBuffer(VertexConsumer consumer, VertexFormat format, boolean solid) {
+        this.consumer = consumer;
+        this.entity = format == DefaultVertexFormat.NEW_ENTITY;
+        this.textured = this.entity || format == ClientPlatform.TEXTURED_FORMAT;
+        this.gain = this.entity ? ShaderCompat.gain(solid) : 1.0F;
+    }
+
+    public static VfxBuffer of(MultiBufferSource consumers, RenderType layer) {
+        return new VfxBuffer(consumers.getBuffer(layer), layer.format(), AddonRenderTypes.isSolid(layer));
+    }
+
+    public void vertex(Matrix4f matrix, float x, float y, float z, int r, int g, int b, int a, float u, float v) {
+        if (this.gain != 1.0F) {
+            r = Math.min(255, (int) (r * this.gain));
+            g = Math.min(255, (int) (g * this.gain));
+            b = Math.min(255, (int) (b * this.gain));
+        }
+        if (this.entity) {
+            ClientPlatform.entityVertex(this.consumer, matrix, UP, x, y, z, r, g, b, a, u, v, LightTexture.FULL_BRIGHT, 0.0F, 1.0F, 0.0F);
+        } else if (this.textured) {
+            ClientPlatform.vertex(this.consumer, matrix, x, y, z, r, g, b, a, u, v);
+        } else {
+            ClientPlatform.vertex(this.consumer, matrix, x, y, z, r, g, b, a);
+        }
+    }
+
+    public static Vec3 rotate(Quaternionf rotation, float x, float y, float z) {
+        Vector3f out = rotation.transform(new Vector3f(x, y, z));
+        return new Vec3(out.x(), out.y(), out.z());
+    }
+}

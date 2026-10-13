@@ -229,5 +229,147 @@
         "attenuation_distance": 64
       }
     ]
+  },
+  "vorpal_charge": {
+    "subtitle": "subtitles.simplyanime.vorpal_charge",
+    "sounds": [
+      {
+        "name": "simplyanime:vorpal/charge",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "vorpal_strike": {
+    "subtitle": "subtitles.simplyanime.vorpal_strike",
+    "sounds": [
+      {
+        "name": "simplyanime:vorpal/strike",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "square_slash": {
+    "subtitle": "subtitles.simplyanime.square_slash",
+    "sounds": [
+      {
+        "name": "simplyanime:square/slash1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "simplyanime:square/slash2",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "simplyanime:square/slash3",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "square_release": {
+    "subtitle": "subtitles.simplyanime.square_release",
+    "sounds": [
+      {
+        "name": "simplyanime:square/release",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "starburst_stance": {
+    "subtitle": "subtitles.simplyanime.starburst_stance",
+    "sounds": [
+      {
+        "name": "simplyanime:starburst/stance",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "starburst_slash_dark": {
+    "subtitle": "subtitles.simplyanime.starburst_slash_dark",
+    "sounds": [
+      {
+        "name": "simplyanime:starburst/slash_dark1",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_dark2",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_dark3",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_dark4",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_dark5",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_dark6",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "starburst_slash_light": {
+    "subtitle": "subtitles.simplyanime.starburst_slash_light",
+    "sounds": [
+      {
+        "name": "simplyanime:starburst/slash_light1",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_light2",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_light3",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_light4",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_light5",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simplyanime:starburst/slash_light6",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "starburst_coil": {
+    "subtitle": "subtitles.simplyanime.starburst_coil",
+    "sounds": [
+      {
+        "name": "simplyanime:starburst/coil",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "starburst_finale": {
+    "subtitle": "subtitles.simplyanime.starburst_finale",
+    "sounds": [
+      {
+        "name": "simplyanime:starburst/finale",
+        "attenuation_distance": 80
+      }
+    ]
+  },
+  "blade_hit": {
+    "subtitle": "subtitles.simplyanime.blade_hit",
+    "sounds": [
+      {
+        "name": "simplyanime:blade/hit1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "simplyanime:blade/hit2",
+        "attenuation_distance": 24
+      }
+    ]
   }
 }

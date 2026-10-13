@@ -20,16 +20,35 @@ Forge 1.20.1 and NeoForge 1.21.1.
 - Right click, Cruel Sun: raise the axe and a small sun forms over you, burning anything close to it. Then
   it is thrown and goes off in a dome of fire. The sun and the blast are bigger toward noon.
 
-All three are registered like any other Simply Swords unique: they show up in loot chests, take gems and
-runic upgrades, and ship Better Combat weapon attributes. Ea can also be crafted (two nether stars, redstone blocks,
-gold blocks and a netherite ingot).
+**Elucidator** (longsword)
+- Right click, Vorpal Strike: draw the sword back while it charges, then lunge and drive a lance of light
+  through everything in front of you. It goes through terrain and never breaks blocks.
 
-Enuma Elish and Cruel Sun show the ability's name above the hotbar when they go off, that can be turned off.
+**Dark Repulser** (longsword)
+- Right click, Horizontal Square: four cuts that draw a square of light around you, each one flying outward.
+  The square then bursts and throws back what it touches.
+
+**Starburst Stream** (Elucidator in the main hand, Dark Repulser in the off hand)
+- Right click turns into a flurry of over thirty cuts that fills the air around you while you keep walking,
+  and ends on a crossing blow. Once it starts it can't be cancelled, you take less damage while it runs,
+  and both swords go on cooldown together.
+
+All five are registered like any other Simply Swords unique: they show up wherever Simply Swords uniques do, take
+gems and runic upgrades, and ship Better Combat weapon attributes. Ea can also be crafted (two nether stars,
+redstone blocks, gold blocks and a netherite ingot).
+
+The abilities show their name above the hotbar when they go off, that can be turned off.
+
+The skills of Elucidator and Dark Repulser are fully animated from start to end. The spear, Rhitta and the two
+swords have their own attack swings that follow each other: two cuts and a thrust for the blades, three heavy
+blows for the axe, and holding the attack button keeps them coming. With Better Combat installed its animations
+are used for attacks. `attackAnimations` and `holdToAttack` in `client.toml` turn these off.
 
 Config files are in `config/simplyanime/`:
-- `weapons.toml`: the spear and Ea. Damage, cooldowns, beam size, sounds, whether Ea is craftable or found in loot.
+- `weapons.toml`: the spear, Ea, Elucidator, Dark Repulser and Starburst Stream. Damage, cooldowns, sizes, sounds,
+  whether Ea is craftable, which of them are found in loot.
 - `rhitta.toml`: the axe, how the sun affects it, Cruel Sun, and the block damage options (all off by default).
-- `rhitta_client.toml` and `client.toml`: per player. Camera, HUD, particles, glow strength with shaders.
+- `rhitta_client.toml` and `client.toml`: per player. Camera, screen flashes, HUD, particles, glow strength with shaders.
 
 `/SimplyAnime cooldown reset [players]` clears ability cooldowns (needs op), handy for testing.
 

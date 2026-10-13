@@ -1,0 +1,131 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.gradle.userdev' version '7.0.182'
+}
+
+group = project.maven_group
+version = project.mod_version
+
+base {
+    archivesName = "${project.mod_id}-neoforge-${project.minecraft_version}"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+// everything that isn't NeoForge or 1.21.1 specific lives in ../common
+sourceSets {
+    main {
+        java.srcDir '../common/src/main/java'
+        resources.srcDir '../common/src/main/resources'
+        runs {
+            modIdentifier project.mod_id
+        }
+    }
+    // dev only test mod, never goes in the jar
+    autotest {
+        java.srcDir '../common/src/autotest/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+        runs {
+            modIdentifier 'simplyanime_autotest'
+        }
+    }
+}
+
+configurations {
+    autotestImplementation.extendsFrom implementation
+    autotestCompileOnly.extendsFrom compileOnly
+    autotestRuntimeOnly.extendsFrom runtimeOnly
+    // mods the dev game needs, copied into the run's mods folder so they load like they would for a player
+    devMods {
+        canBeConsumed = false
+        transitive = false
+    }
+}
+
+def autotest = project.hasProperty('autotest')
+def clientRunDir = autotest ? 'run-autotest' : 'run'
+
+runs {
+    configureEach {
+        modSource project.sourceSets.main
+    }
+    client {
+        workingDirectory.set(project.file(clientRunDir))
+        // gradlew runClient -Pautotest -Pshaders=all -Peffect=sun,ea
+        if (autotest) {
+            systemProperty 'simplyanime.autotest', 'true'
+            systemProperty 'simplyanime.autotest.shaders', (project.findProperty('shaders') ?: '').toString()
+            systemProperty 'simplyanime.autotest.effect', (project.findProperty('effect') ?: '').toString()
+            systemProperty 'simplyanime.autotest.time', (project.findProperty('time') ?: '13200').toString()
+            modSource project.sourceSets.autotest
+            programArguments.addAll '--width', '1280', '--height', '720'
+        }
+    }
+    server {
+        workingDirectory.set(project.file('run-server'))
+        programArgument '--nogui'
+    }
+}
+
+repositories {
+    maven {
+        url = "https://api.modrinth.com/maven"
+        content { includeGroup "maven.modrinth" }
+    }
+    maven { url = "https://maven.fzzyhmstrs.me/" }
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${project.neo_version}"
+
+    compileOnly "maven.modrinth:simply-swords:${project.simply_swords_version}"
+    compileOnly("me.fzzyhmstrs:fzzy_config:${project.fzzy_config_version}") {
+        transitive = false
+    }
+
+    devMods "maven.modrinth:simply-swords:${project.simply_swords_version}"
+    devMods "maven.modrinth:simply-tooltips:${project.simply_tooltips_version}"
+    devMods "maven.modrinth:fzzy-config:${project.fzzy_config_version}"
+    devMods "maven.modrinth:architectury-api:${project.architectury_version}"
+    devMods "maven.modrinth:kotlin-for-forge:${project.kotlinforforge_version}"
+    // sodium + iris to test the effects under shader packs
+    devMods "maven.modrinth:sodium:${project.sodium_version}"
+    devMods "maven.modrinth:iris:${project.iris_version}"
+}
+
+tasks.register('prepareDevMods', Sync) {
+    from configurations.devMods
+    into layout.projectDirectory.dir("${clientRunDir}/mods")
+}
+tasks.register('prepareServerMods', Sync) {
+    from configurations.devMods
+    exclude 'sodium-*', 'iris-*'
+    into layout.projectDirectory.dir('run-server/mods')
+}
+tasks.matching { it.name == 'runClient' }.configureEach {
+    dependsOn 'prepareDevMods'
+    if (autotest) {
+        doFirst {
+            delete 'run-autotest/saves/autotest', 'run-autotest/screenshots'
+        }
+    }
+}
+tasks.matching { it.name == 'runServer' }.configureEach {
+    dependsOn 'prepareServerMods'
+}
+
+tasks.withType(ProcessResources).configureEach {
+    inputs.property "version", project.version
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand "version": project.version
+    }
+    // the shared models are written for Forge, NeoForge renamed its two model extensions
+    filesMatching('assets/simplyanime/models/item/*.json') {
+        filter { it.replace('"forge_data"', '"neoforge_data"').replace('forge:separate_transforms', 'neoforge:separate_transforms') }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

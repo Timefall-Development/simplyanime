@@ -2,6 +2,7 @@
 build/
 run/
 run-autotest/
+run-server/
 out/
 .idea/
 *.iml
@@ -11,3 +12,4 @@ bin/
 references/
 *.log
 showcase/
+runs/

@@ -1,7 +1,7 @@
 # Simply Anime
 
 An addon for [Simply Swords](https://github.com/Sweenus/SimplySwords) that adds unique weapons from anime.
-Forge 1.20.1.
+Forge 1.20.1 and NeoForge 1.21.1.
 
 ## Weapons
 
@@ -35,36 +35,62 @@ Config files are in `config/simplyanime/`:
 
 ## Shaders
 
-Works with Oculus (and Embeddium). The effects use each pack's own glow and bloom and light the ground around
+Works with Oculus on Forge and Iris on NeoForge. The effects use each pack's own glow and bloom and light the ground around
 them. Tested with BSL, Complementary Reimagined and Unbound, MakeUp Ultra Fast, Rethinking Voxels, Solas,
 Photon and Bliss. If a pack washes the effects out, lower `shaderGlow` in `client.toml`.
 
 ## Requirements
 
-- Minecraft 1.20.1, Forge 47.4 or newer
+Forge 1.20.1:
+- Forge 47.4 or newer
 - Simply Swords 1.70.2 or newer (and its own dependencies)
-- Architectury API 9.2.14 or newer
+- Fzzy Config 0.7.6 or newer
+
+NeoForge 1.21.1 (also loads on 1.21):
+- NeoForge 21.1 or newer
+- Simply Swords 1.70.2 or newer (and its own dependencies)
+- Fzzy Config 0.7.6 or newer
+
+## Layout
+
+```
+common/            everything that is the same on every version: weapons, abilities, effects, assets
+forge-1.20.1/      the Forge entry classes, its data files and the few 1.20.1 only classes
+neoforge-1.21.1/   the same for NeoForge 1.21.1
+```
+
+Each version folder is its own Gradle project and compiles `common` in with it. The shared code never
+touches a loader: `CommonEvents` and `SimplyAnimeClient` hold what happens on each event, and the entry
+class in each version folder (`SimplyAnimeForge`, `SimplyAnimeNeoForge`) only listens and calls in.
+What Minecraft itself changed between the two versions sits behind the `platform` package, which every
+version folder has with the same class names.
+
+Registration and networking go through Fzzy Config, so nothing here uses the Architectury API.
+
+A new weapon goes in `common`. A version folder only needs touching for its data files (recipes,
+advancements, tags) or when something needs a new entry in `platform`.
 
 ## Building
 
-Gradle has to run on **Java 21** (Architectury Loom 1.13 needs it). The mod itself targets Java 17.
-If your default Java isn't 21, point Gradle at one, for example in `~/.gradle/gradle.properties`:
+Run Gradle from the version folder you want. It has to run on **Java 21** (the mod for 1.20.1 still
+targets Java 17). If your default Java isn't 21, point Gradle at one, for example in
+`~/.gradle/gradle.properties`:
 
 ```
 org.gradle.java.home=/path/to/jdk-21
 ```
 
-Then:
+Then, inside `forge-1.20.1` or `neoforge-1.21.1`:
 
 ```
-./gradlew build        # jar ends up in build/libs/simplyanime-<version>.jar
+./gradlew build        # jar ends up in build/libs
 ./gradlew runClient    # dev client with Simply Swords and its dependencies
+./gradlew runServer    # dev server, on Forge add -Pplain to leave the shader mods out
 ./gradlew runClient -Pautotest -Pshaders=all    # casts everything under each pack in run-autotest/shaderpacks, saves screenshots
 ```
 
-Simply Swords and Simply Tooltips come from the Modrinth maven by version id (`gradle.properties`),
-because the Forge and Fabric builds share the same version number and the plain number resolves to
-the Fabric jar.
+The dependencies come from the Modrinth maven by version id (`gradle.properties`), because the builds
+for different loaders share the same version number.
 
 ## Credits
 

@@ -68,13 +68,13 @@ public abstract class ClientPlatform extends RenderStateShard {
 
     public static void entityVertex(VertexConsumer consumer, Matrix4f matrix, Matrix3f normal, float x, float y, float z,
                                     int r, int g, int b, int a, float u, float v, int light, float nx, float ny, float nz) {
-        Vector3f n = normal.transform(new Vector3f(nx, ny, nz));
+        Vector3f transformedNormal = normal.transform(new Vector3f(nx, ny, nz));
         consumer.addVertex(matrix, x, y, z)
                 .setColor(r, g, b, a)
                 .setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setLight(light)
-                .setNormal(n.x(), n.y(), n.z());
+                .setNormal(transformedNormal.x(), transformedNormal.y(), transformedNormal.z());
     }
 
     public static void particleVertex(VertexConsumer consumer, double x, double y, double z, float u, float v,

@@ -50,9 +50,9 @@ public class Later {
         if (ShaderCompat.packInUse() || ShaderCompat.shadowPass() || Minecraft.useShaderTransparency()) {
             return false;
         }
-        Minecraft mc = Minecraft.getInstance();
-        Camera camera = mc.gameRenderer.getMainCamera();
-        return mc.level != null && camera.isInitialized() && !translucent(mc.level.getBlockState(camera.getBlockPosition()));
+        Minecraft minecraft = Minecraft.getInstance();
+        Camera camera = minecraft.gameRenderer.getMainCamera();
+        return minecraft.level != null && camera.isInitialized() && !translucent(minecraft.level.getBlockState(camera.getBlockPosition()));
     }
 
     private static boolean translucent(BlockState state) {
@@ -64,9 +64,9 @@ public class Later {
 
     private static boolean submerged(Entity entity) {
         Level level = entity.level();
-        Vec3 at = entity.position();
-        return !level.getFluidState(BlockPos.containing(at.x, at.y + 0.2, at.z)).isEmpty()
-                && !level.getFluidState(BlockPos.containing(at.x, at.y + 1.6, at.z)).isEmpty();
+        Vec3 position = entity.position();
+        return !level.getFluidState(BlockPos.containing(position.x, position.y + 0.2, position.z)).isEmpty()
+                && !level.getFluidState(BlockPos.containing(position.x, position.y + 1.6, position.z)).isEmpty();
     }
 
     // called when the translucent blocks are in

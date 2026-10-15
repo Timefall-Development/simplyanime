@@ -63,18 +63,18 @@ public class ArmChainLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         // arm box in model pixels, see PlayerEntityModel
         float halfX = this.slim ? 1.5F : 2.0F;
         float centerX = (arm == HumanoidArm.RIGHT ? -1.0F : 1.0F) * (this.slim ? 0.5F : 1.0F);
-        float rx = halfX + 0.55F;
-        float rz = 2.55F;
+        float radiusX = halfX + 0.55F;
+        float radiusZ = 2.55F;
         float top = -0.5F;
         float bottom = 9.6F;
 
         int samples = 240;
-        Vec3 previous = spiral(0, centerX, rx, rz, top, bottom);
+        Vec3 previous = spiral(0, centerX, radiusX, radiusZ, top, bottom);
         float travelled = 0;
         int link = 0;
         Vec3 linkStart = previous;
         for (int i = 1; i <= samples; i++) {
-            Vec3 point = spiral(i / (float) samples, centerX, rx, rz, top, bottom);
+            Vec3 point = spiral(i / (float) samples, centerX, radiusX, radiusZ, top, bottom);
             travelled += (float) point.distanceTo(previous);
             previous = point;
             if (travelled < LINK) {
@@ -86,9 +86,9 @@ public class ArmChainLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         }
     }
 
-    private static Vec3 spiral(float t, float centerX, float rx, float rz, float top, float bottom) {
-        float angle = t * TURNS * Mth.TWO_PI;
-        return new Vec3(centerX + Mth.cos(angle) * rx, Mth.lerp(t, top, bottom), Mth.sin(angle) * rz);
+    private static Vec3 spiral(float progress, float centerX, float radiusX, float radiusZ, float top, float bottom) {
+        float angle = progress * TURNS * Mth.TWO_PI;
+        return new Vec3(centerX + Mth.cos(angle) * radiusX, Mth.lerp(progress, top, bottom), Mth.sin(angle) * radiusZ);
     }
 
     private static void drawLink(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 from, Vec3 to,
@@ -105,13 +105,13 @@ public class ArmChainLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
 
         Vec3 a = center.subtract(stretch).subtract(across);
         Vec3 b = center.add(stretch).subtract(across);
-        Vec3 c = center.add(stretch).add(across);
-        Vec3 d = center.subtract(stretch).add(across);
+        Vec3 cornerC = center.add(stretch).add(across);
+        Vec3 cornerD = center.subtract(stretch).add(across);
         Vec3 facing = flat ? out : along.cross(out).normalize();
         vertex(vertices, matrix, normal, a, facing, shade, light);
         vertex(vertices, matrix, normal, b, facing, shade, light);
-        vertex(vertices, matrix, normal, c, facing, shade, light);
-        vertex(vertices, matrix, normal, d, facing, shade, light);
+        vertex(vertices, matrix, normal, cornerC, facing, shade, light);
+        vertex(vertices, matrix, normal, cornerD, facing, shade, light);
     }
 
     private static void vertex(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 pixel, Vec3 facing,

@@ -160,19 +160,19 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             float thinNext = Mth.sin(Mth.PI * (i + 1) / last);
             Vec3 out = mark.outer[i];
             Vec3 outNext = mark.outer[i + 1];
-            Vec3 in = out.lerp(mark.inner[i], thin * 0.7F);
+            Vec3 inward = out.lerp(mark.inner[i], thin * 0.7F);
             Vec3 inNext = outNext.lerp(mark.inner[i + 1], thinNext * 0.7F);
             if (dark) {
-                this.quad(buffer, in, NIGHT, 0.0F, out, NIGHT, 0.9F * burn, outNext, NIGHT, 0.9F * burn, inNext, NIGHT, 0.0F);
+                this.quad(buffer, inward, NIGHT, 0.0F, out, NIGHT, 0.9F * burn, outNext, NIGHT, 0.9F * burn, inNext, NIGHT, 0.0F);
                 continue;
             }
             if (burn > 0.01F) {
-                Vec3 edge = in.lerp(out, 0.6);
+                Vec3 edge = inward.lerp(out, 0.6);
                 Vec3 edgeNext = inNext.lerp(outNext, 0.6);
-                Vec3 over = in.lerp(out, 1.14);
+                Vec3 over = inward.lerp(out, 1.14);
                 Vec3 overNext = inNext.lerp(outNext, 1.14);
                 float soft = mark.blade == SlashMark.DARK ? 0.0F : 0.4F * burn;
-                this.quad(buffer, in, body, 0.0F, edge, body, soft, edgeNext, body, soft, inNext, body, 0.0F);
+                this.quad(buffer, inward, body, 0.0F, edge, body, soft, edgeNext, body, soft, inNext, body, 0.0F);
                 this.quad(buffer, edge, body, Math.max(soft, 0.5F * burn), out, rim, burn, outNext, rim, burn,
                         edgeNext, body, Math.max(soft, 0.5F * burn));
                 this.quad(buffer, out, rim, burn, over, rim, 0.0F, overNext, rim, 0.0F, outNext, rim, burn);
@@ -187,24 +187,24 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             // slid along the screen, in steps
             float slide = (float) Math.floor((hash(mark.seed + i * 7 + beat, 4) - 0.5F) * 6.0F) * 0.14F * Math.min(1.0F, age / 8.0F);
             Vec3 shift = this.camRight.scale(slide);
-            Vec3 a = in.lerp(out, 0.84).add(shift);
+            Vec3 a = inward.lerp(out, 0.84).add(shift);
             Vec3 b = out.add(shift);
-            Vec3 c = outNext.add(shift);
-            Vec3 d = inNext.lerp(outNext, 0.84).add(shift);
+            Vec3 cornerC = outNext.add(shift);
+            Vec3 cornerD = inNext.lerp(outNext, 0.84).add(shift);
             int[] color = key > 0.86F ? WHITE : body;
             float alpha = left * (0.45F + 0.55F * key);
-            this.quad(buffer, a, color, alpha * 0.4F, b, color, alpha, c, color, alpha, d, color, alpha * 0.4F);
+            this.quad(buffer, a, color, alpha * 0.4F, b, color, alpha, cornerC, color, alpha, cornerD, color, alpha * 0.4F);
             Vec3 apart = this.camRight.scale(0.22);
-            this.quad(buffer, a.add(apart), ghost, 0.0F, b.add(apart), ghost, alpha * 0.45F, c.add(apart), ghost, alpha * 0.45F,
-                    d.add(apart), ghost, 0.0F);
+            this.quad(buffer, a.add(apart), ghost, 0.0F, b.add(apart), ghost, alpha * 0.45F, cornerC.add(apart), ghost, alpha * 0.45F,
+                    cornerD.add(apart), ghost, 0.0F);
             if (key > 0.9F) {
                 // a square knocked loose
                 float size = 0.07F + 0.12F * hash(mark.seed + i, 5);
-                Vec3 at = out.add(this.camRight.scale(slide * 3.0F)).add(this.camUp.scale((hash(mark.seed + i, 6) - 0.5F) * 0.8F));
+                Vec3 position = out.add(this.camRight.scale(slide * 3.0F)).add(this.camUp.scale((hash(mark.seed + i, 6) - 0.5F) * 0.8F));
                 Vec3 right = this.camRight.scale(size);
-                Vec3 up = this.camUp.scale(size);
-                this.quad(buffer, at.subtract(right).subtract(up), rim, left, at.add(right).subtract(up), rim, left,
-                        at.add(right).add(up), rim, left, at.subtract(right).add(up), rim, left);
+                Vec3 upward = this.camUp.scale(size);
+                this.quad(buffer, position.subtract(right).subtract(upward), rim, left, position.add(right).subtract(upward), rim, left,
+                        position.add(right).add(upward), rim, left, position.subtract(right).add(upward), rim, left);
             }
         }
     }
@@ -272,9 +272,9 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
         Vec3 lastTail = null;
         float lastTaper = 0.0F;
         for (int i = 0; i <= steps; i++) {
-            float s = -1.0F + 2.0F * i / steps;
-            float taper = 1.0F - s * s;
-            Vec3 front = center.add(across.scale(half * s)).add(ahead.scale(bulge * taper));
+            float sideways = -1.0F + 2.0F * i / steps;
+            float taper = 1.0F - sideways * sideways;
+            Vec3 front = center.add(across.scale(half * sideways)).add(ahead.scale(bulge * taper));
             Vec3 back = front.subtract(ahead.scale(depth * taper));
             Vec3 tail = front.subtract(ahead.scale(depth * 3.2F * taper));
             if (lastFront != null) {
@@ -321,10 +321,10 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             Vec3 side = SlashWave.perpendicular(along);
             Vec3 other = along.cross(side);
             for (int i = 0; i < 3; i++) {
-                float t = Mth.frac(charge * 1.5F + i / 3.0F);
-                float radius = 3.2F * (1.0F - t) + 0.25F;
+                float progress = Mth.frac(charge * 1.5F + i / 3.0F);
+                float radius = 3.2F * (1.0F - progress) + 0.25F;
                 this.ring(glow, base.lerp(tip, 0.25F + 0.3F * i), side, other, radius, 0.1F + 0.12F * charge, CRIMSON,
-                        0.85F * t * charge, spin * 0.25F, 40);
+                        0.85F * progress * charge, spin * 0.25F, 40);
             }
             this.flare(glow, tip, 0.5F + 1.6F * charge, CRIMSON, 0.55F * charge);
             this.flare(glow, tip, 0.25F + 0.6F * charge, HOT, 0.9F * charge);
@@ -361,17 +361,17 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             Vec3 last = null;
             float lastWidth = 0.0F;
             for (int i = 0; i <= steps; i++) {
-                float s = (float) i / steps;
-                float at = Mth.lerp(s, tail, reach);
-                float shape = s < 0.3F ? 0.35F + 0.65F * Mth.sin(s / 0.3F * Mth.HALF_PI) : Mth.sqrt(Math.max(0.0F, (1.0F - s) / 0.7F));
-                float pulse = 1.0F + 0.08F * Mth.sin(spin * 1.3F - at * 0.9F);
-                Vec3 point = start.add(aim.scale(at));
-                float w = width * shape * pulse;
+                float along = (float) i / steps;
+                float distance = Mth.lerp(along, tail, reach);
+                float shape = along < 0.3F ? 0.35F + 0.65F * Mth.sin(along / 0.3F * Mth.HALF_PI) : Mth.sqrt(Math.max(0.0F, (1.0F - along) / 0.7F));
+                float pulse = 1.0F + 0.08F * Mth.sin(spin * 1.3F - distance * 0.9F);
+                Vec3 point = start.add(aim.scale(distance));
+                float halfWidth = width * shape * pulse;
                 if (last != null) {
-                    this.segment(glow, last, lastWidth, point, w, color, alpha, aim);
+                    this.segment(glow, last, lastWidth, point, halfWidth, color, alpha, aim);
                 }
                 last = point;
-                lastWidth = w;
+                lastWidth = halfWidth;
             }
         }
         Vec3 side = SlashWave.perpendicular(aim);
@@ -379,11 +379,11 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
         Vec3 lastA = null;
         Vec3 lastB = null;
         for (int i = 0; i <= 120; i++) {
-            float at = Mth.lerp(i / 120.0F, tail, reach);
-            float angle = at * 1.1F - spin * 0.9F;
-            float wide = radius * 1.15F * thick * Math.min(1.0F, at / 3.0F) * Math.min(1.0F, (reach - at) / 4.0F);
+            float distance = Mth.lerp(i / 120.0F, tail, reach);
+            float angle = distance * 1.1F - spin * 0.9F;
+            float wide = radius * 1.15F * thick * Math.min(1.0F, distance / 3.0F) * Math.min(1.0F, (reach - distance) / 4.0F);
             Vec3 around = side.scale(Mth.cos(angle)).add(other.scale(Mth.sin(angle)));
-            Vec3 a = start.add(aim.scale(at)).add(around.scale(wide));
+            Vec3 a = start.add(aim.scale(distance)).add(around.scale(wide));
             Vec3 b = a.add(aim.scale(0.55)).add(around.scale(0.12));
             if (lastA != null) {
                 this.quad(glow, lastA, CRIMSON, 0.75F * thick, lastB, EMBER, 0.0F, b, EMBER, 0.0F, a, CRIMSON, 0.75F * thick);
@@ -392,11 +392,11 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             lastB = b;
         }
         for (int i = 0; i < 11; i++) {
-            float at = 1.5F + i * (length - 3.0F) / 11.0F;
-            float born = at / length * 2.0F;
+            float distance = 1.5F + i * (length - 3.0F) / 11.0F;
+            float born = distance / length * 2.0F;
             float life = (since - born) / 11.0F;
-            if (life > 0.0F && life < 1.0F && at <= reach) {
-                this.ring(glow, start.add(aim.scale(at)), side, other, radius * (0.8F + 3.8F * life), 0.32F * (1.0F - life),
+            if (life > 0.0F && life < 1.0F && distance <= reach) {
+                this.ring(glow, start.add(aim.scale(distance)), side, other, radius * (0.8F + 3.8F * life), 0.32F * (1.0F - life),
                         i % 2 == 0 ? EMBER : CRIMSON, 0.85F * (1.0F - life), spin * 0.2F, 56);
             }
         }
@@ -472,9 +472,9 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             if (sheet > 0.01F) {
                 Vec3 a = center.add(corners.get(0).subtract(center).scale(grow));
                 Vec3 b = center.add(corners.get(1).subtract(center).scale(grow));
-                Vec3 c = center.add(corners.get(2).subtract(center).scale(grow));
-                Vec3 d = center.add(corners.get(3).subtract(center).scale(grow));
-                this.quad(glow, a, TEAL, sheet, b, TEAL, sheet, c, TEAL, sheet, d, TEAL, sheet);
+                Vec3 cornerC = center.add(corners.get(2).subtract(center).scale(grow));
+                Vec3 cornerD = center.add(corners.get(3).subtract(center).scale(grow));
+                this.quad(glow, a, TEAL, sheet, b, TEAL, sheet, cornerC, TEAL, sheet, cornerD, TEAL, sheet);
             }
             this.ring(glow, center, new Vec3(1, 0, 0), new Vec3(0, 0, 1), 0.9F + 0.2F * Mth.sin(spin * 0.4F), 0.07F, FROST,
                     0.7F * closed * strength, spin * 0.2F, 32);
@@ -516,20 +516,20 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             // every hit kicks a ring out along the ground
             float since = now - entity.lastHitAt;
             if (since >= 0.0F && since < 7.0F) {
-                float t = since / 7.0F;
-                this.ring(glow, feet, east, south, 1.0F + 7.5F * t, 0.3F * (1.0F - t), WHITE, 0.8F * (1.0F - t), 0.0F, 64);
+                float progress = since / 7.0F;
+                this.ring(glow, feet, east, south, 1.0F + 7.5F * progress, 0.3F * (1.0F - progress), WHITE, 0.8F * (1.0F - progress), 0.0F, 64);
             }
             boolean breath = now >= coil && entity.finaleAt < 0;
             if (now < launch || breath) {
-                float t = breath ? Mth.clamp((now - coil) / 6.0F, 0.0F, 1.0F) : Mth.clamp(now / launch, 0.0F, 1.0F);
+                float progress = breath ? Mth.clamp((now - coil) / 6.0F, 0.0F, 1.0F) : Mth.clamp(now / launch, 0.0F, 1.0F);
                 Vec3 chest = owner.getPosition(partialTick).add(0, owner.getBbHeight() * 0.62, 0);
                 for (int i = 0; i < 3; i++) {
-                    float shrink = Mth.frac(t * 1.2F + i / 3.0F);
+                    float shrink = Mth.frac(progress * 1.2F + i / 3.0F);
                     this.ring(glow, chest, this.camRight, this.camUp, (breath ? 7.0F : 4.5F) * (1.0F - shrink) + 0.3F, 0.1F,
                             i == 1 ? TEAL : STARLIGHT, 0.8F * shrink, spin * 0.1F, 48);
                 }
-                this.flare(glow, chest, 0.8F + 2.2F * t, STARLIGHT, 0.5F * t);
-                this.flare(glow, chest, 0.4F + 0.9F * t, WHITE, 0.8F * t);
+                this.flare(glow, chest, 0.8F + 2.2F * progress, STARLIGHT, 0.5F * progress);
+                this.flare(glow, chest, 0.4F + 0.9F * progress, WHITE, 0.8F * progress);
             }
         }
 
@@ -587,14 +587,14 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
         for (int i = 0; i < 90; i++) {
             float lane = hash(i, 1);
             float pace = (0.9F + hash(i, 2) * 1.6F) * (surge ? 2.2F : 1.0F);
-            float at = Mth.frac(hash(i, 3) + spin * pace / reach);
+            float phase = Mth.frac(hash(i, 3) + spin * pace / reach);
             float around = hash(i, 4) * Mth.TWO_PI + spin * 0.01F;
             float out = 1.6F + lane * lane * 7.5F;
-            Vec3 from = heart.add(ahead.scale(at * reach - reach * 0.3F))
+            Vec3 from = heart.add(ahead.scale(phase * reach - reach * 0.3F))
                     .add(side.scale(Mth.cos(around) * out)).add(0, Mth.sin(around) * out * 0.75F + 0.6F, 0);
             float tail = 1.2F + hash(i, 5) * 3.6F;
             int[] color = i % 4 == 0 ? TEAL : i % 4 == 1 ? WHITE : STARLIGHT;
-            float seen = strength * Mth.sin(at * Mth.PI) * (0.45F + 0.55F * hash(i, 6));
+            float seen = strength * Mth.sin(phase * Mth.PI) * (0.45F + 0.55F * hash(i, 6));
             this.line(glow, from.subtract(ahead.scale(tail)), from, 0.05F + 0.07F * hash(i, 7), color, 0.0F, color, seen);
         }
     }
@@ -616,9 +616,9 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             return;
         }
         int light = this.entityRenderDispatcher.getPackedLightCoords(owner, partialTick);
-        Vec3 at = owner.getPosition(partialTick).subtract(this.origin);
+        Vec3 ownerPosition = owner.getPosition(partialTick).subtract(this.origin);
         poseStack.pushPose();
-        poseStack.translate(at.x, at.y, at.z);
+        poseStack.translate(ownerPosition.x, ownerPosition.y, ownerPosition.z);
         BladePoses.root(owner, poseStack, partialTick);
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - Mth.rotLerp(partialTick, owner.yBodyRotO, owner.yBodyRot)));
         poseStack.scale(-0.9375F, -0.9375F, 0.9375F);
@@ -650,17 +650,17 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
         poseStack.popPose();
     }
 
-    private void vertex(VfxBuffer buffer, Vec3 at, int[] color, float alpha) {
-        buffer.vertex(this.matrix, (float) (at.x - this.origin.x), (float) (at.y - this.origin.y), (float) (at.z - this.origin.z),
+    private void vertex(VfxBuffer buffer, Vec3 position, int[] color, float alpha) {
+        buffer.vertex(this.matrix, (float) (position.x - this.origin.x), (float) (position.y - this.origin.y), (float) (position.z - this.origin.z),
                 color[0], color[1], color[2], (int) (Mth.clamp(alpha * (color == NIGHT ? 1.0F : this.dim), 0.0F, 1.0F) * 255.0F), 0.0F, 0.0F);
     }
 
     private void quad(VfxBuffer buffer, Vec3 a, int[] colorA, float alphaA, Vec3 b, int[] colorB, float alphaB,
-                      Vec3 c, int[] colorC, float alphaC, Vec3 d, int[] colorD, float alphaD) {
+                      Vec3 cornerC, int[] colorC, float alphaC, Vec3 cornerD, int[] colorD, float alphaD) {
         this.vertex(buffer, a, colorA, alphaA);
         this.vertex(buffer, b, colorB, alphaB);
-        this.vertex(buffer, c, colorC, alphaC);
-        this.vertex(buffer, d, colorD, alphaD);
+        this.vertex(buffer, cornerC, colorC, alphaC);
+        this.vertex(buffer, cornerD, colorD, alphaD);
     }
 
     private void line(VfxBuffer buffer, Vec3 from, Vec3 to, float width, int[] colorFrom, float alphaFrom, int[] colorTo, float alphaTo) {
@@ -700,14 +700,14 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
         for (int i = 0; i <= steps; i++) {
             float angle = turn + i * Mth.TWO_PI / steps;
             Vec3 spoke = axisA.scale(Mth.cos(angle)).add(axisB.scale(Mth.sin(angle)));
-            Vec3 in = center.add(spoke.scale(Math.max(0.0F, radius - band)));
+            Vec3 inward = center.add(spoke.scale(Math.max(0.0F, radius - band)));
             Vec3 mid = center.add(spoke.scale(radius));
             Vec3 out = center.add(spoke.scale(radius + band));
             if (lastIn != null) {
-                this.quad(buffer, lastIn, color, 0.0F, lastMid, color, alpha, mid, color, alpha, in, color, 0.0F);
+                this.quad(buffer, lastIn, color, 0.0F, lastMid, color, alpha, mid, color, alpha, inward, color, 0.0F);
                 this.quad(buffer, lastMid, color, alpha, lastOut, color, 0.0F, out, color, 0.0F, mid, color, alpha);
             }
-            lastIn = in;
+            lastIn = inward;
             lastMid = mid;
             lastOut = out;
         }

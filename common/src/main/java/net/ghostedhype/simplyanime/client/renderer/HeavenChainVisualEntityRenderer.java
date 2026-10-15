@@ -82,10 +82,10 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
 
         if (!ShaderCompat.shadowPass()) {
             if (phase == HeavenChainVisualEntity.PHASE_SPIN) {
-                float t = Math.min(phaseTime, entity.getSpinDuration());
-                renderSpinTrail(glow, matrix, normal, entity, origin, ownerPos, t, entity.getRadius(), entity.getBaseYaw(), 1.0F);
+                float progress = Math.min(phaseTime, entity.getSpinDuration());
+                renderSpinTrail(glow, matrix, normal, entity, origin, ownerPos, progress, entity.getRadius(), entity.getBaseYaw(), 1.0F);
                 // second fainter streak, one looked empty
-                renderSpinTrail(glow, matrix, normal, entity, origin, ownerPos, t, entity.getRadius() * 0.75F,
+                renderSpinTrail(glow, matrix, normal, entity, origin, ownerPos, progress, entity.getRadius() * 0.75F,
                         entity.getBaseYaw() + Mth.PI * 0.9F, 0.55F);
             } else if (phase != HeavenChainVisualEntity.PHASE_WINDUP) {
                 renderHistoryTrail(glow, matrix, normal, entity, origin, blade);
@@ -130,26 +130,26 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
             float widthB = 0.75F * (float) Math.pow(fadeB, 0.6) * strength;
             Vec3 a = points.get(i);
             Vec3 b = points.get(i + 1);
-            Vec3 wa = widths.get(i).scale(widthA);
-            Vec3 wb = widths.get(i + 1).scale(widthB);
+            Vec3 startOffset = widths.get(i).scale(widthA);
+            Vec3 endOffset = widths.get(i + 1).scale(widthB);
 
             // bands can't overlap or they z-fight
             int darkA = (int) (220 * fadeA * strength);
             int darkB = (int) (220 * fadeB * strength);
             quad(vertices, matrix, normal,
-                    a.add(wa), b.add(wb), b.add(wb.scale(0.45)), a.add(wa.scale(0.45)),
+                    a.add(startOffset), b.add(endOffset), b.add(endOffset.scale(0.45)), a.add(startOffset.scale(0.45)),
                     10, 10, darkA, darkB, FULL_BRIGHT);
 
             int shadeA = (int) Mth.lerpInt(1.0F - fadeA, 255, 40);
             int shadeB = (int) Mth.lerpInt(1.0F - fadeB, 255, 40);
             quad(vertices, matrix, normal,
-                    a.add(wa.scale(0.45)), b.add(wb.scale(0.45)),
-                    b.subtract(wb.scale(0.45)), a.subtract(wa.scale(0.45)),
+                    a.add(startOffset.scale(0.45)), b.add(endOffset.scale(0.45)),
+                    b.subtract(endOffset.scale(0.45)), a.subtract(startOffset.scale(0.45)),
                     shadeA, shadeB, (int) (245 * fadeA * strength), (int) (245 * fadeB * strength), FULL_BRIGHT);
 
             quad(vertices, matrix, normal,
-                    a.subtract(wa.scale(0.45)), b.subtract(wb.scale(0.45)),
-                    b.subtract(wb.scale(0.65)), a.subtract(wa.scale(0.65)),
+                    a.subtract(startOffset.scale(0.45)), b.subtract(endOffset.scale(0.45)),
+                    b.subtract(endOffset.scale(0.65)), a.subtract(startOffset.scale(0.65)),
                     10, 10, darkA / 2, darkB / 2, FULL_BRIGHT);
         }
     }
@@ -178,17 +178,17 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
         if (length < 0.1) {
             return;
         }
-        Vec3 dir = span.scale(1.0 / length);
-        Vec3 side = dir.cross(UP);
+        Vec3 direction = span.scale(1.0 / length);
+        Vec3 side = direction.cross(UP);
         side = side.lengthSqr() < 1.0E-4 ? new Vec3(1, 0, 0) : side.normalize();
-        Vec3 side2 = dir.cross(side).normalize();
+        Vec3 side2 = direction.cross(side).normalize();
 
         int links = Mth.ceil(length / LINK_LENGTH);
         for (int k = 0; k < links; k++) {
             double start = k * LINK_LENGTH - 0.02;
             double end = Math.min(length, (k + 1) * LINK_LENGTH + 0.02);
-            Vec3 a = from.add(dir.scale(start));
-            Vec3 b = from.add(dir.scale(end));
+            Vec3 a = from.add(direction.scale(start));
+            Vec3 b = from.add(direction.scale(end));
             Vec3 across = (k & 1) == 0 ? side : side2;
             int shade = (k & 1) == 0 ? 165 : 120;
             for (int bar = -1; bar <= 1; bar += 2) {
@@ -203,17 +203,17 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
     }
 
     private void renderBlade(HeavenChainVisualEntity entity, PoseStack poseStack,
-                             MultiBufferSource buffers, Vec3 pos, Vec3 pointing, float spinTime, int light) {
+                             MultiBufferSource buffers, Vec3 position, Vec3 pointing, float spinTime, int light) {
         ItemStack stack = entity.getStack();
         if (stack.isEmpty()) {
             return;
         }
-        Vec3 dir = pointing.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : pointing.normalize();
-        float yawDeg = (float) (Mth.atan2(dir.x, dir.z) * Mth.RAD_TO_DEG);
-        float pitchDeg = (float) (-Math.asin(Mth.clamp(dir.y, -1.0, 1.0)) * Mth.RAD_TO_DEG);
+        Vec3 direction = pointing.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : pointing.normalize();
+        float yawDeg = (float) (Mth.atan2(direction.x, direction.z) * Mth.RAD_TO_DEG);
+        float pitchDeg = (float) (-Math.asin(Mth.clamp(direction.y, -1.0, 1.0)) * Mth.RAD_TO_DEG);
 
         poseStack.pushPose();
-        poseStack.translate(pos.x, pos.y, pos.z);
+        poseStack.translate(position.x, position.y, position.z);
         poseStack.mulPose(Axis.YP.rotationDegrees(yawDeg));
         poseStack.mulPose(Axis.XP.rotationDegrees(pitchDeg));
         poseStack.translate(0.0, 0.0, 0.32);
@@ -238,31 +238,31 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
         float bodyYaw = Mth.rotLerp(partialTick, owner.yBodyRotO, owner.yBodyRot) * Mth.DEG_TO_RAD;
         double side = owner.getMainArm() == HumanoidArm.LEFT ? -1.0 : 1.0;
         Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0, -Mth.sin(bodyYaw)).scale(side);
-        Vec3 pos = owner.getPosition(partialTick);
+        Vec3 position = owner.getPosition(partialTick);
         if (!armOut) {
-            return pos.add(right.scale(0.38)).add(0, owner.getBbHeight() * 0.42, 0);
+            return position.add(right.scale(0.38)).add(0, owner.getBbHeight() * 0.42, 0);
         }
         return InvertedSpearPoses.spinHandPos(owner, chain, partialTick);
     }
 
     // both windings, culling was eating half of it
-    static void quad(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 a, Vec3 b, Vec3 c, Vec3 d,
+    static void quad(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 a, Vec3 b, Vec3 cornerC, Vec3 cornerD,
                      int shadeAD, int shadeBC, int alphaAD, int alphaBC, int light) {
         vertex(vertices, matrix, normal, a, shadeAD, alphaAD, light);
         vertex(vertices, matrix, normal, b, shadeBC, alphaBC, light);
-        vertex(vertices, matrix, normal, c, shadeBC, alphaBC, light);
-        vertex(vertices, matrix, normal, d, shadeAD, alphaAD, light);
+        vertex(vertices, matrix, normal, cornerC, shadeBC, alphaBC, light);
+        vertex(vertices, matrix, normal, cornerD, shadeAD, alphaAD, light);
 
-        vertex(vertices, matrix, normal, d, shadeAD, alphaAD, light);
-        vertex(vertices, matrix, normal, c, shadeBC, alphaBC, light);
+        vertex(vertices, matrix, normal, cornerD, shadeAD, alphaAD, light);
+        vertex(vertices, matrix, normal, cornerC, shadeBC, alphaBC, light);
         vertex(vertices, matrix, normal, b, shadeBC, alphaBC, light);
         vertex(vertices, matrix, normal, a, shadeAD, alphaAD, light);
     }
 
-    private static void vertex(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 pos,
+    private static void vertex(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 position,
                                int shade, int alpha, int light) {
         int a = Mth.clamp(alpha, 0, 255);
-        ClientPlatform.entityVertex(vertices, matrix, normal, (float) pos.x, (float) pos.y, (float) pos.z,
+        ClientPlatform.entityVertex(vertices, matrix, normal, (float) position.x, (float) position.y, (float) position.z,
                 shade, shade, shade, a, 0.5F, 0.5F, light, 0.0F, 1.0F, 0.0F);
     }
 }

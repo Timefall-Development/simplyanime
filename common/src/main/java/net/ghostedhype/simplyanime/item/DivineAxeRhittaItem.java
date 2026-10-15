@@ -36,11 +36,11 @@ public class DivineAxeRhittaItem extends AnimeWeaponItem {
     // shorter the stronger the sun
     @Override
     public int getActivationCooldownTicks(ItemStack stack, WeaponAbilityContext context) {
-        RhittaConfig.CruelSunSettings cfg = RhittaConfig.get().cruelSun;
+        RhittaConfig.CruelSunSettings settings = RhittaConfig.get().cruelSun;
         float sun = context == null || context.actor() == null ? 0.0F
                 : SunPower.fraction(SunPower.sunPower(context.world(), context.actor()));
-        float multiplier = Mth.lerp(sun, cfg.nightCooldownMultiplier, cfg.noonCooldownMultiplier);
-        return Math.max(cfg.minCooldown, Math.round(cfg.cooldown * multiplier));
+        float multiplier = Mth.lerp(sun, settings.nightCooldownMultiplier, settings.noonCooldownMultiplier);
+        return Math.max(settings.minCooldown, Math.round(settings.cooldown * multiplier));
     }
 
     @Override

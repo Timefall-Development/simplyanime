@@ -15,12 +15,12 @@ public abstract class EffectEntity extends SyncedEntity {
         this.setNoGravity(true);
     }
 
-    protected static Vector3f pack(Vec3 vec) {
-        return new Vector3f((float) vec.x, (float) vec.y, (float) vec.z);
+    protected static Vector3f pack(Vec3 vector) {
+        return new Vector3f((float) vector.x, (float) vector.y, (float) vector.z);
     }
 
-    protected static Vec3 unpack(Vector3f vec) {
-        return new Vec3(vec.x(), vec.y(), vec.z());
+    protected static Vec3 unpack(Vector3f vector) {
+        return new Vec3(vector.x(), vector.y(), vector.z());
     }
 
     @Override

@@ -96,10 +96,10 @@ public class EnumaElishVisualEntity extends PhasedEffectEntity {
         if (phase == PHASE_CHARGE && owner != null) {
             spots.add(chargeTip(owner, 1.0F));
         } else if (phase == PHASE_BEAM) {
-            Vec3 dir = this.getAim();
+            Vec3 direction = this.getAim();
             double reach = this.getLength() * growth(this.getPhaseTicks(0.0F));
-            for (double s = 2.0; s < reach && spots.size() < 14; s += 12.0) {
-                spots.add(this.position().add(dir.scale(s)));
+            for (double distance = 2.0; distance < reach && spots.size() < 14; distance += 12.0) {
+                spots.add(this.position().add(direction.scale(distance)));
             }
         }
         EffectLights.set(this, spots);
@@ -112,8 +112,8 @@ public class EnumaElishVisualEntity extends PhasedEffectEntity {
         Level world = this.level();
         RandomSource random = this.random;
         Vec3 tip = chargeTip(owner, 1.0F);
-        float t = this.getPhaseProgress(0.0F);
-        int count = 1 + (int) (t * 5);
+        float progress = this.getPhaseProgress(0.0F);
+        int count = 1 + (int) (progress * 5);
         for (int i = 0; i < count; i++) {
             // embers pulled in
             double yaw = random.nextDouble() * Mth.TWO_PI;
@@ -121,10 +121,10 @@ public class EnumaElishVisualEntity extends PhasedEffectEntity {
             double dist = 2.5 + random.nextDouble() * 2.5;
             Vec3 from = tip.add(Math.cos(yaw) * Math.cos(pitch) * dist, Math.sin(pitch) * dist,
                     Math.sin(yaw) * Math.cos(pitch) * dist);
-            Vec3 pull = tip.subtract(from).scale(0.11 + t * 0.06);
+            Vec3 pull = tip.subtract(from).scale(0.11 + progress * 0.06);
             world.addParticle(ParticlesRegistry.RUPTURE_EMBER.get(), from.x, from.y, from.z, pull.x, pull.y, pull.z);
         }
-        if (t > 0.55 && random.nextFloat() < t) {
+        if (progress > 0.55 && random.nextFloat() < progress) {
             world.addParticle(ParticleTypes.END_ROD, tip.x, tip.y, tip.z,
                     (random.nextDouble() - 0.5) * 0.15, (random.nextDouble() - 0.5) * 0.15,
                     (random.nextDouble() - 0.5) * 0.15);
@@ -133,28 +133,28 @@ public class EnumaElishVisualEntity extends PhasedEffectEntity {
             double a = random.nextDouble() * Mth.TWO_PI;
             double r = 1.2 + random.nextDouble() * 1.6;
             world.addParticle(ParticleTypes.LARGE_SMOKE, owner.getX() + Math.cos(a) * r, owner.getY() + 0.1,
-                    owner.getZ() + Math.sin(a) * r, 0, 0.03 + t * 0.05, 0);
+                    owner.getZ() + Math.sin(a) * r, 0, 0.03 + progress * 0.05, 0);
         }
     }
 
     private void beamParticles() {
         Level world = this.level();
         RandomSource random = this.random;
-        Vec3 dir = this.getAim();
+        Vec3 direction = this.getAim();
         float length = this.getLength();
         float radius = this.getRadius();
         for (int i = 0; i < 24; i++) {
             double along = random.nextDouble() * length;
             double a = random.nextDouble() * Mth.TWO_PI;
-            Vec3 side = perpendicular(dir);
-            Vec3 up = dir.cross(side);
-            Vec3 out = side.scale(Math.cos(a)).add(up.scale(Math.sin(a)));
-            Vec3 p = this.position().add(dir.scale(along)).add(out.scale(profile(along, radius) * (0.9 + random.nextDouble() * 0.5)));
-            Vec3 v = out.scale(0.12 + random.nextDouble() * 0.2).add(dir.scale(0.4));
-            world.addParticle(ParticlesRegistry.RUPTURE_EMBER.get(), p.x, p.y, p.z, v.x, v.y, v.z);
+            Vec3 side = perpendicular(direction);
+            Vec3 upward = direction.cross(side);
+            Vec3 out = side.scale(Math.cos(a)).add(upward.scale(Math.sin(a)));
+            Vec3 point = this.position().add(direction.scale(along)).add(out.scale(profile(along, radius) * (0.9 + random.nextDouble() * 0.5)));
+            Vec3 v = out.scale(0.12 + random.nextDouble() * 0.2).add(direction.scale(0.4));
+            world.addParticle(ParticlesRegistry.RUPTURE_EMBER.get(), point.x, point.y, point.z, v.x, v.y, v.z);
         }
         if (this.isHitTerrain()) {
-            Vec3 end = this.position().add(dir.scale(length));
+            Vec3 end = this.position().add(direction.scale(length));
             if (this.tickCount % 5 == 0) {
                 world.addParticle(ParticleTypes.EXPLOSION, end.x + (random.nextDouble() - 0.5) * radius * 2,
                         end.y + (random.nextDouble() - 0.5) * radius * 2,
@@ -214,9 +214,9 @@ public class EnumaElishVisualEntity extends PhasedEffectEntity {
         return shoulder.add(arm.scale(0.62 * scale)).add(blade.scale(1.8 * scale));
     }
 
-    public static Vec3 perpendicular(Vec3 dir) {
-        Vec3 helper = Math.abs(dir.y) > 0.95 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
-        return dir.cross(helper).normalize();
+    public static Vec3 perpendicular(Vec3 direction) {
+        Vec3 helper = Math.abs(direction.y) > 0.95 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
+        return direction.cross(helper).normalize();
     }
 
     public void aim(Vec3 origin, Vec3 direction, float length, boolean hitTerrain) {

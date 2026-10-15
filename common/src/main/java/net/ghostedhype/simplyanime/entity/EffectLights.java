@@ -35,20 +35,20 @@ public class EffectLights {
         for (Vec3 spot : spots) {
             wanted.add(BlockPos.containing(spot));
         }
-        Set<BlockPos> placed = LIGHTS.computeIfAbsent(owner, e -> new HashSet<>());
+        Set<BlockPos> placed = LIGHTS.computeIfAbsent(owner, key -> new HashSet<>());
         Iterator<BlockPos> old = placed.iterator();
         while (old.hasNext()) {
-            BlockPos pos = old.next();
-            if (!wanted.contains(pos)) {
-                remove(world, pos);
+            BlockPos position = old.next();
+            if (!wanted.contains(position)) {
+                remove(world, position);
                 old.remove();
             }
         }
         BlockState light = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15);
-        for (BlockPos pos : wanted) {
-            if (!placed.contains(pos) && world.getBlockState(pos).isAir()) {
-                world.setBlock(pos, light, FLAGS);
-                placed.add(pos);
+        for (BlockPos position : wanted) {
+            if (!placed.contains(position) && world.getBlockState(position).isAir()) {
+                world.setBlock(position, light, FLAGS);
+                placed.add(position);
             }
         }
     }
@@ -56,15 +56,15 @@ public class EffectLights {
     public static void clear(Entity owner) {
         Set<BlockPos> placed = LIGHTS.remove(owner);
         if (placed != null) {
-            for (BlockPos pos : placed) {
-                remove(owner.level(), pos);
+            for (BlockPos position : placed) {
+                remove(owner.level(), position);
             }
         }
     }
 
-    private static void remove(Level world, BlockPos pos) {
-        if (world.getBlockState(pos).is(Blocks.LIGHT)) {
-            world.setBlock(pos, Blocks.AIR.defaultBlockState(), FLAGS);
+    private static void remove(Level world, BlockPos position) {
+        if (world.getBlockState(position).is(Blocks.LIGHT)) {
+            world.setBlock(position, Blocks.AIR.defaultBlockState(), FLAGS);
         }
     }
 }

@@ -179,8 +179,8 @@ public class InvertedSpearAbilityManager {
             if (payoff != null && payoff.isAlive()) {
                 field.flingTo = payoff.position().add(0, payoff.getBbHeight() * 0.55, 0);
             }
-            float t = (elapsed - flingStart + 1) / (float) settings.flingDuration;
-            float eased = 1.0F - (1.0F - t) * (1.0F - t);
+            float progress = (elapsed - flingStart + 1) / (float) settings.flingDuration;
+            float eased = 1.0F - (1.0F - progress) * (1.0F - progress);
             chain.setBlade(field.flingFrom.lerp(field.flingTo, eased));
 
             if (elapsed == retractStart - 1) {
@@ -222,8 +222,8 @@ public class InvertedSpearAbilityManager {
             Vec3 across = hand.subtract(field.retractFrom);
             Vec3 side = new Vec3(-across.z, 0, across.x).normalize().scale(across.length() * 0.55);
             Vec3 control = mid.add(side).add(0, 0.6, 0);
-            float t = (elapsed - retractStart + 1) / (float) settings.retractDuration;
-            chain.setBlade(bezier(field.retractFrom, control, hand, t * t));
+            float progress = (elapsed - retractStart + 1) / (float) settings.retractDuration;
+            chain.setBlade(bezier(field.retractFrom, control, hand, progress * progress));
             return true;
         }
 
@@ -497,9 +497,9 @@ public class InvertedSpearAbilityManager {
                 center.x + radius, center.y + height + actor.getBbHeight(), center.z + radius);
         double radiusSq = radius * radius;
         return new ArrayList<>(world.getEntitiesOfClass(LivingEntity.class, area, target -> {
-            double dx = target.getX() - center.x;
-            double dz = target.getZ() - center.z;
-            return dx * dx + dz * dz <= radiusSq && AbilityHelper.canHit(world, target, actor, ownerId);
+            double offsetX = target.getX() - center.x;
+            double offsetZ = target.getZ() - center.z;
+            return offsetX * offsetX + offsetZ * offsetZ <= radiusSq && AbilityHelper.canHit(world, target, actor, ownerId);
         }));
     }
 
@@ -527,9 +527,9 @@ public class InvertedSpearAbilityManager {
         return (float) (Mth.atan2(direction.z, direction.x) * Mth.RAD_TO_DEG) - 90.0F;
     }
 
-    private static Vec3 bezier(Vec3 a, Vec3 control, Vec3 b, float t) {
-        float u = 1.0F - t;
-        return a.scale(u * u).add(control.scale(2 * u * t)).add(b.scale(t * t));
+    private static Vec3 bezier(Vec3 a, Vec3 control, Vec3 b, float progress) {
+        float u = 1.0F - progress;
+        return a.scale(u * u).add(control.scale(2 * u * progress)).add(b.scale(progress * progress));
     }
 
     private static void playSound(ServerLevel world, Entity source, SoundEvent sound, float volume, float pitch) {

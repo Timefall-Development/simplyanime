@@ -24,8 +24,8 @@ public class AnimationClips {
                 throw new IllegalStateException("missing animation " + path);
             }
             return new AnimationClip(name, JsonParser.parseReader(new InputStreamReader(raw, StandardCharsets.UTF_8)).getAsJsonObject());
-        } catch (IOException e) {
-            throw new IllegalStateException("could not read animation " + path, e);
+        } catch (IOException exception) {
+            throw new IllegalStateException("could not read animation " + path, exception);
         }
     }
 }

@@ -34,42 +34,42 @@ public class SunPower {
         return power;
     }
 
-    public static float sunLevel(Level world, BlockPos pos) {
-        RhittaConfig.SunSettings cfg = RhittaConfig.get().sun;
-        Float override = dimensionOverride(world, cfg);
+    public static float sunLevel(Level world, BlockPos position) {
+        RhittaConfig.SunSettings settings = RhittaConfig.get().sun;
+        Float override = dimensionOverride(world, settings);
         if (override != null) {
             return override;
         }
         DimensionType dimension = world.dimensionType();
         if (!dimension.hasSkyLight() || dimension.hasFixedTime()) {
-            return cfg.skylessMode.get() == SkylessMode.NOON ? 1.0F : Mth.clamp(cfg.skylessLevel, 0.0F, 1.0F);
+            return settings.skylessMode.get() == SkylessMode.NOON ? 1.0F : Mth.clamp(settings.skylessLevel, 0.0F, 1.0F);
         }
 
-        float level = timeCurve(world.getDayTime(), cfg.curve.get());
-        if (cfg.indoorsMatter) {
-            float sky = world.getBrightness(LightLayer.SKY, pos) / 15.0F;
-            level *= 1.0F - cfg.indoorPenalty * (1.0F - sky);
+        float level = timeCurve(world.getDayTime(), settings.curve.get());
+        if (settings.indoorsMatter) {
+            float sky = world.getBrightness(LightLayer.SKY, position) / 15.0F;
+            level *= 1.0F - settings.indoorPenalty * (1.0F - sky);
         }
-        if (cfg.weatherMatters && world.isRaining() && getsRain(world, pos)) {
-            level *= world.isThundering() ? cfg.thunderFactor : cfg.rainFactor;
+        if (settings.weatherMatters && world.isRaining() && getsRain(world, position)) {
+            level *= world.isThundering() ? settings.thunderFactor : settings.rainFactor;
         }
         return Float.isFinite(level) ? Mth.clamp(level, 0.0F, 1.0F) : 0.0F;
     }
 
     public static float fromLevel(float level) {
-        RhittaConfig.SunSettings cfg = RhittaConfig.get().sun;
-        float power = Mth.lerp(level, cfg.minPower, cfg.peakPower);
+        RhittaConfig.SunSettings settings = RhittaConfig.get().sun;
+        float power = Mth.lerp(level, settings.minPower, settings.peakPower);
         return Float.isFinite(power) ? Math.max(0.0F, power) : 1.0F;
     }
 
     public static float fraction(float power) {
-        RhittaConfig.SunSettings cfg = RhittaConfig.get().sun;
-        float span = cfg.peakPower - cfg.minPower;
+        RhittaConfig.SunSettings settings = RhittaConfig.get().sun;
+        float span = settings.peakPower - settings.minPower;
         if (Math.abs(span) < 1.0E-4F) {
             return 1.0F;
         }
-        float f = (power - cfg.minPower) / span;
-        return Float.isFinite(f) ? Mth.clamp(f, 0.0F, 1.0F) : 0.0F;
+        float fraction = (power - settings.minPower) / span;
+        return Float.isFinite(fraction) ? Mth.clamp(fraction, 0.0F, 1.0F) : 0.0F;
     }
 
     // 1 at noon (6000), 0 at midnight (18000)
@@ -85,22 +85,22 @@ public class SunPower {
         return (float) ((height + 1.0) * 0.5);
     }
 
-    private static boolean getsRain(Level world, BlockPos pos) {
-        return world.getBiome(pos).value().getPrecipitationAt(pos) != Biome.Precipitation.NONE;
+    private static boolean getsRain(Level world, BlockPos position) {
+        return world.getBiome(position).value().getPrecipitationAt(position) != Biome.Precipitation.NONE;
     }
 
-    private static Float dimensionOverride(Level world, RhittaConfig.SunSettings cfg) {
-        if (cfg.dimensionOverrides.isBlank()) {
+    private static Float dimensionOverride(Level world, RhittaConfig.SunSettings settings) {
+        if (settings.dimensionOverrides.isBlank()) {
             return null;
         }
         ResourceLocation id = world.dimension().location();
-        for (String entry : cfg.dimensionOverrides.split(",")) {
-            int eq = entry.indexOf('=');
-            if (eq <= 0 || !id.toString().equals(entry.substring(0, eq).trim())) {
+        for (String entry : settings.dimensionOverrides.split(",")) {
+            int equalsIndex = entry.indexOf('=');
+            if (equalsIndex <= 0 || !id.toString().equals(entry.substring(0, equalsIndex).trim())) {
                 continue;
             }
             try {
-                return Mth.clamp(Float.parseFloat(entry.substring(eq + 1).trim()), 0.0F, 1.0F);
+                return Mth.clamp(Float.parseFloat(entry.substring(equalsIndex + 1).trim()), 0.0F, 1.0F);
             } catch (NumberFormatException ignored) {
                 return null;
             }

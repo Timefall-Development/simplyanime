@@ -21,17 +21,17 @@ import java.util.UUID;
 // bits every ability needs
 public class AbilityHelper {
 
-    public static void playSound(ServerLevel world, Vec3 at, SoundEvent sound, float volume, float pitch) {
+    public static void playSound(ServerLevel world, Vec3 position, SoundEvent sound, float volume, float pitch) {
         if (volume > 0) {
-            world.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, volume, pitch);
+            world.playSound(null, position.x, position.y, position.z, sound, SoundSource.PLAYERS, volume, pitch);
         }
     }
 
     public static double distanceToPoint(AABB box, Vec3 point) {
-        double dx = Math.max(Math.max(box.minX - point.x, 0.0), point.x - box.maxX);
-        double dy = Math.max(Math.max(box.minY - point.y, 0.0), point.y - box.maxY);
-        double dz = Math.max(Math.max(box.minZ - point.z, 0.0), point.z - box.maxZ);
-        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+        double distanceX = Math.max(Math.max(box.minX - point.x, 0.0), point.x - box.maxX);
+        double distanceY = Math.max(Math.max(box.minY - point.y, 0.0), point.y - box.maxY);
+        double distanceZ = Math.max(Math.max(box.minZ - point.z, 0.0), point.z - box.maxZ);
+        return Math.sqrt(distanceX * distanceX + distanceY * distanceY + distanceZ * distanceZ);
     }
 
     public static boolean canHit(ServerLevel world, LivingEntity target, LivingEntity actor, @Nullable UUID ownerId) {

@@ -32,8 +32,8 @@ public class AnimationPose {
     }
 
     public boolean isEmpty() {
-        for (float w : this.weight) {
-            if (w > 0.0F) {
+        for (float partWeight : this.weight) {
+            if (partWeight > 0.0F) {
                 return false;
             }
         }
@@ -73,8 +73,8 @@ public class AnimationPose {
         this.swap(AnimationClip.RIGHT_ITEM, AnimationClip.LEFT_ITEM);
         for (int part = 0; part < AnimationClip.PARTS; part++) {
             this.position[part].x = -this.position[part].x;
-            Quaternionf q = this.rotation[part];
-            q.set(q.x, -q.y, -q.z, q.w);
+            Quaternionf rotation = this.rotation[part];
+            rotation.set(rotation.x, -rotation.y, -rotation.z, rotation.w);
         }
         int sword = this.rightSword;
         this.rightSword = this.leftSword;
@@ -88,8 +88,8 @@ public class AnimationPose {
         this.scratchRotation.set(this.rotation[a]);
         this.rotation[a].set(this.rotation[b]);
         this.rotation[b].set(this.scratchRotation);
-        float w = this.weight[a];
+        float weight = this.weight[a];
         this.weight[a] = this.weight[b];
-        this.weight[b] = w;
+        this.weight[b] = weight;
     }
 }

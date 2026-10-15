@@ -17,13 +17,13 @@ public class BladeSparkParticle extends TextureSheetParticle {
     private final float startScale;
     private final float turn;
 
-    private BladeSparkParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz,
+    private BladeSparkParticle(ClientLevel world, double x, double y, double z, double velocityX, double velocityY, double velocityZ,
                                SpriteSet sprites, int kind) {
         super(world, x, y, z, 0, 0, 0);
         this.kind = kind;
-        this.xd = vx;
-        this.yd = vy;
-        this.zd = vz;
+        this.xd = velocityX;
+        this.yd = velocityY;
+        this.zd = velocityZ;
         this.hasPhysics = false;
         this.friction = kind == FROST ? 0.93F : 0.9F;
         this.gravity = kind == FROST ? 0.35F : 0.0F;

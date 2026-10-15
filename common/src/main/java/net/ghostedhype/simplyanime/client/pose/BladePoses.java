@@ -169,8 +169,8 @@ public class BladePoses {
         if (entity.getPose() != Pose.STANDING || entity.isPassenger() || casting(entity)) {
             return false;
         }
-        Minecraft mc = Minecraft.getInstance();
-        if (entity == mc.player && !mc.options.keyAttack.isDown()) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (entity == minecraft.player && !minecraft.options.keyAttack.isDown()) {
             return false;
         }
         return !aimsAtBlock(entity);
@@ -249,10 +249,10 @@ public class BladePoses {
         state.hasApplied = pose.locked > 0.0F;
     }
 
-    public static void turn(ModelPart part, Quaternionf q) {
-        part.xRot = (float) Math.atan2(2.0F * (q.y * q.z + q.w * q.x), 1.0F - 2.0F * (q.x * q.x + q.y * q.y));
-        part.yRot = (float) Math.asin(Mth.clamp(-2.0F * (q.x * q.z - q.w * q.y), -1.0F, 1.0F));
-        part.zRot = (float) Math.atan2(2.0F * (q.x * q.y + q.w * q.z), 1.0F - 2.0F * (q.y * q.y + q.z * q.z));
+    public static void turn(ModelPart part, Quaternionf rotation) {
+        part.xRot = (float) Math.atan2(2.0F * (rotation.y * rotation.z + rotation.w * rotation.x), 1.0F - 2.0F * (rotation.x * rotation.x + rotation.y * rotation.y));
+        part.yRot = (float) Math.asin(Mth.clamp(-2.0F * (rotation.x * rotation.z - rotation.w * rotation.y), -1.0F, 1.0F));
+        part.zRot = (float) Math.atan2(2.0F * (rotation.x * rotation.y + rotation.w * rotation.z), 1.0F - 2.0F * (rotation.y * rotation.y + rotation.z * rotation.z));
     }
 
     public static void enforce(LivingEntity entity, HumanoidModel<?> model) {

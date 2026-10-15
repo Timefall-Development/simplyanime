@@ -42,7 +42,7 @@ public class BladeCinematics {
                 continue;
             }
             float near = (float) Mth.clamp(1.0 - skill.position().distanceTo(eye) / 40.0, 0.0, 1.0);
-            float[] seen = SEEN.computeIfAbsent(skill, s -> new float[]{-100.0F, -1.0F, -1.0F, -1.0F});
+            float[] seen = SEEN.computeIfAbsent(skill, key -> new float[]{-100.0F, -1.0F, -1.0F, -1.0F});
             boolean mine = skill.getOwner() == client.player;
             if (mine && skill.isRunning()) {
                 boolean stream = skill.getSkill() == BladeSkill.STARBURST_STREAM;
@@ -102,8 +102,8 @@ public class BladeCinematics {
             return null;
         }
         Minecraft client = Minecraft.getInstance();
-        float t = (client.player == null ? 0 : client.player.tickCount) + partialTick;
-        return new float[]{shake * Mth.sin(t * 3.1F), shake * 0.8F * Mth.sin(t * 3.7F + 1.0F), shake * 0.5F * Mth.sin(t * 2.3F + 2.0F)};
+        float progress = (client.player == null ? 0 : client.player.tickCount) + partialTick;
+        return new float[]{shake * Mth.sin(progress * 3.1F), shake * 0.8F * Mth.sin(progress * 3.7F + 1.0F), shake * 0.5F * Mth.sin(progress * 2.3F + 2.0F)};
     }
 
     public static void renderOverlay(GuiGraphics context, float partialTick) {

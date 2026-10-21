@@ -249,16 +249,16 @@ public class CalloutHud {
 
     // near zero alpha text draws fully solid, skip it
     private static int color(int rgb, float alpha) {
-        int a = (int) (Mth.clamp(alpha, 0.0F, 1.0F) * 255.0F);
-        return a < 8 ? 0 : a << 24 | rgb;
+        int alphaByte = (int) (Mth.clamp(alpha, 0.0F, 1.0F) * 255.0F);
+        return alphaByte < 8 ? 0 : alphaByte << 24 | rgb;
     }
 
     private static int mix(int from, int to, float progress) {
         progress = Mth.clamp(progress, 0.0F, 1.0F);
-        int r = (int) Mth.lerpInt(progress, from >> 16 & 255, to >> 16 & 255);
-        int g = (int) Mth.lerpInt(progress, from >> 8 & 255, to >> 8 & 255);
-        int b = (int) Mth.lerpInt(progress, from & 255, to & 255);
-        return r << 16 | g << 8 | b;
+        int red = (int) Mth.lerpInt(progress, from >> 16 & 255, to >> 16 & 255);
+        int green = (int) Mth.lerpInt(progress, from >> 8 & 255, to >> 8 & 255);
+        int blue = (int) Mth.lerpInt(progress, from & 255, to & 255);
+        return red << 16 | green << 8 | blue;
     }
 
     private static float hash(int index, int salt) {

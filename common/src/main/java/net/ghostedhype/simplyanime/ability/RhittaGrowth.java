@@ -59,7 +59,7 @@ public class RhittaGrowth {
 
     public static void tick(Player player) {
         Map<Player, float[]> map = player.level().isClientSide() ? CLIENT : SERVER;
-        float[] scale = map.computeIfAbsent(player, ignored -> new float[]{1.0F, 1.0F, 1.0F});
+        float[] scale = map.computeIfAbsent(player, trackedPlayer -> new float[]{1.0F, 1.0F, 1.0F});
         scale[0] = scale[1];
         float target = targetScale(player);
         float next = scale[1] + (target - scale[1]) * 0.08F;

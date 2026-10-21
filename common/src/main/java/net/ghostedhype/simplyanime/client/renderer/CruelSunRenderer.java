@@ -235,8 +235,8 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
     }
 
     // fewer flames when it is far away
-    private static float detail(Vec3 camera, Vec3 position) {
-        double distance = camera.distanceTo(position);
+    private static float detail(Vec3 camera, Vec3 point) {
+        double distance = camera.distanceTo(point);
         return distance < 64 ? 1.0F : distance < 160 ? 0.6F : 0.35F;
     }
 
@@ -326,9 +326,9 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
     private static Vec3 spot(int i, int count, float turned, float tilt) {
         float y = 1.0F - 2.0F * (i + 0.5F) / count;
         float ring = Mth.sqrt(Math.max(0.0F, 1.0F - y * y));
-        float a = i * 2.39996F + turned;
-        float x = ring * Mth.cos(a);
-        float z = ring * Mth.sin(a);
+        float angle = i * 2.39996F + turned;
+        float x = ring * Mth.cos(angle);
+        float z = ring * Mth.sin(angle);
         float cosTilt = Mth.cos(tilt);
         float sinTilt = Mth.sin(tilt);
         return new Vec3(x, y * cosTilt - z * sinTilt, y * sinTilt + z * cosTilt);
@@ -367,10 +367,10 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
             Vec3[] path = new Vec3[26];
             for (int j = 0; j < path.length; j++) {
                 float progress = j / (float) (path.length - 1);
-                float a = k * Mth.TWO_PI / 6.0F + progress * 6.5F - time * 0.3F;
+                float angle = k * Mth.TWO_PI / 6.0F + progress * 6.5F - time * 0.3F;
                 float r = wide * (1.0F - progress);
                 double y = Mth.lerp(progress, ground.y, center.y) + Mth.sin(Mth.PI * progress) * full * 1.2F;
-                path[j] = new Vec3(center.x + Mth.cos(a) * r, y, center.z + Mth.sin(a) * r);
+                path[j] = new Vec3(center.x + Mth.cos(angle) * r, y, center.z + Mth.sin(angle) * r);
             }
             float thick = full * 0.22F;
             b.ribbon(SunRenderTypes.RAY, path, thick, thick * 0.3F, FLAME, 0.7F * alpha, alpha, 0.0F);
@@ -401,21 +401,21 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
     // god rays
     private static void rays(SunBatch b, Vec3 center, float start, float reach, float width, int count, float time, int[] color, float alpha) {
         for (int i = 0; i < count; i++) {
-            float a = i * Mth.TWO_PI / count + time * 0.004F + (i % 3) * 0.13F;
+            float angle = i * Mth.TWO_PI / count + time * 0.004F + (i % 3) * 0.13F;
             float length = reach * (0.55F + 0.45F * (0.5F + 0.5F * Mth.sin(time * 0.21F + i * 3.1F)));
             float fade = 0.6F + 0.4F * Mth.sin(time * 0.33F + i * 1.3F);
-            b.drawRay(center, a, start, Math.max(start + 0.1F, length), width, color, alpha * fade);
+            b.drawRay(center, angle, start, Math.max(start + 0.1F, length), width, color, alpha * fade);
         }
     }
 
     // ground light
     private static void ground(SunBatch b, Vec3 feet, float orb, float since, float sunLevel) {
-        Vec3 position = feet.add(0, 0.05, 0);
+        Vec3 groundCenter = feet.add(0, 0.05, 0);
         float grow = Math.min(1.0F, since / 20.0F);
-        b.drawFlatGlow(position, orb * 2.2F * grow, GOLD, 0.35F + 0.1F * sunLevel);
+        b.drawFlatGlow(groundCenter, orb * 2.2F * grow, GOLD, 0.35F + 0.1F * sunLevel);
         for (int k = 0; k < 3; k++) {
             float cycle = ((since + k * 13.0F) % 40.0F) / 40.0F;
-            b.drawFlatRing(position.add(0, 0.02 * k, 0), orb * (0.4F + 1.8F * cycle) * grow, ORANGE, 0.75F * (1.0F - cycle));
+            b.drawFlatRing(groundCenter.add(0, 0.02 * k, 0), orb * (0.4F + 1.8F * cycle) * grow, ORANGE, 0.75F * (1.0F - cycle));
         }
     }
 
@@ -442,7 +442,7 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
         float front = CruelSunEntity.blastFront(radius, ticks);
         float fade = CruelSunEntity.blastFade(ticks);
         float swell = front * (1.0F + CruelSunEntity.FADE_SWELL * fade);
-        float a = (float) Math.pow(1.0F - fade, 1.3);
+        float remaining = (float) Math.pow(1.0F - fade, 1.3);
         if (swell < 0.05F) {
             return;
         }
@@ -462,23 +462,23 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
         // solid at first then thins out
         float solid = fade < 0.25F ? 1.0F : (float) Math.pow(Math.max(0.0F, 1.0F - (fade - 0.25F) / 0.4F), 1.5);
 
-        if (a > 0.01F) {
-            b.drawGlow(Vec3.ZERO, swell * 1.8F, GOLD, 0.25F * a);
-            b.drawGlow(Vec3.ZERO, swell * 1.15F, shell, 0.3F * a);
-            rays(b, Vec3.ZERO, swell * 0.3F, swell, swell * 0.08F, 18, time, PALE, 0.6F * a * (1.0F - fade));
+        if (remaining > 0.01F) {
+            b.drawGlow(Vec3.ZERO, swell * 1.8F, GOLD, 0.25F * remaining);
+            b.drawGlow(Vec3.ZERO, swell * 1.15F, shell, 0.3F * remaining);
+            rays(b, Vec3.ZERO, swell * 0.3F, swell, swell * 0.08F, 18, time, PALE, 0.6F * remaining * (1.0F - fade));
 
             // dome, the skin sits on the damage front
             if (solid > 0.5F) {
                 b.drawDepthBall(Vec3.ZERO, swell * 0.95F);
             }
             b.drawBall(true, SunRenderTypes.PLASMA_A, Vec3.ZERO, swell * 0.97F, 0.3F, slide, SunBatch.mix(PALE, ORANGE, fade), SunBatch.mix(ORANGE, FLAME, fade), solid, solid);
-            b.drawBall(false, SunRenderTypes.PLASMA_A, Vec3.ZERO, swell * 0.98F, 0.3F, slide, FLAME, FLAME, 0.5F * a, 0.7F * a);
+            b.drawBall(false, SunRenderTypes.PLASMA_A, Vec3.ZERO, swell * 0.98F, 0.3F, slide, FLAME, FLAME, 0.5F * remaining, 0.7F * remaining);
             b.drawBall(false, SunRenderTypes.PLASMA_B, Vec3.ZERO, swell * 0.99F, -0.8F, -slide * 0.7F, GOLD, ORANGE,
-                    0.45F * a * (1.0F - fade), 0.3F * a);
+                    0.45F * remaining * (1.0F - fade), 0.3F * remaining);
             // hotter ball inside
-            b.drawBall(false, SunRenderTypes.PLASMA_B, Vec3.ZERO, swell * 0.6F, 0.5F, slide * 1.6F, heart, GOLD, 0.5F * a, 0.2F * a);
+            b.drawBall(false, SunRenderTypes.PLASMA_B, Vec3.ZERO, swell * 0.6F, 0.5F, slide * 1.6F, heart, GOLD, 0.5F * remaining, 0.2F * remaining);
             // shock front
-            b.drawBall(false, SunRenderTypes.PLASMA_B, Vec3.ZERO, swell, 1.1F, slide * 0.4F, PALE, PALE, 0.0F, 0.9F * a * (1.0F - fade));
+            b.drawBall(false, SunRenderTypes.PLASMA_B, Vec3.ZERO, swell, 1.1F, slide * 0.4F, PALE, PALE, 0.0F, 0.9F * remaining * (1.0F - fade));
 
             // tongues, tips on the damage front
             int flames = Math.max(24, (int) (70 * detail));
@@ -490,7 +490,7 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
                 }
                 float flick = 0.5F + 0.5F * Mth.sin(time * 0.4F + i * 2.13F);
                 // fade with the solid fire or they look like loose cones
-                float show = a * solid * Mth.clamp(1.15F - facing, 0.0F, 1.0F);
+                float show = remaining * solid * Mth.clamp(1.15F - facing, 0.0F, 1.0F);
                 b.drawTongue(Vec3.ZERO, normal, swell * 0.72F, swell * (0.14F + 0.14F * flick), swell * 0.12F, i, FLAME, 0.9F * show);
                 b.drawTongue(Vec3.ZERO, normal, swell * 0.72F, swell * (0.08F + 0.08F * flick), swell * 0.08F, i + 2, GOLD, 0.8F * show);
             }
@@ -498,7 +498,7 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
             // ground shockwaves
             for (int k = 0; k < 3; k++) {
                 float lag = Math.max(0.0F, 1.0F - k * 0.18F);
-                b.drawFlatRing(new Vec3(0, 0.1 * k, 0), swell * lag, k == 0 ? PALE : ORANGE, (0.9F - 0.2F * k) * a);
+                b.drawFlatRing(new Vec3(0, 0.1 * k, 0), swell * lag, k == 0 ? PALE : ORANGE, (0.9F - 0.2F * k) * remaining);
             }
         }
 
@@ -509,10 +509,10 @@ public class CruelSunRenderer extends EntityRenderer<CruelSunEntity> {
             for (int i = 0; i < 16; i++) {
                 float ang = i * 2.399F;
                 float dist = radius * (0.2F + 0.5F * ((i * 37) % 11) / 10.0F);
-                Vec3 position = new Vec3(Mth.cos(ang) * dist, radius * (0.1F + 0.9F * k) * (0.5F + 0.5F * ((i * 13) % 7) / 6.0F),
+                Vec3 sparkPoint = new Vec3(Mth.cos(ang) * dist, radius * (0.1F + 0.9F * k) * (0.5F + 0.5F * ((i * 13) % 7) / 6.0F),
                         Mth.sin(ang) * dist);
                 float size = radius * (0.35F + 0.3F * ((i * 7) % 5) / 4.0F) * (0.8F + 0.6F * k);
-                b.drawSmoke(position, size, time * 0.01F + i, SMOKE, smokeAlpha);
+                b.drawSmoke(sparkPoint, size, time * 0.01F + i, SMOKE, smokeAlpha);
             }
         }
     }

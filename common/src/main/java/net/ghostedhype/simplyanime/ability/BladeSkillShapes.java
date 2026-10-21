@@ -95,11 +95,11 @@ public class BladeSkillShapes {
         Vector3f local = new Vector3f();
         int from = clip.marker("corner_" + side);
         int to = side < 4 ? clip.marker("corner_" + (side + 1)) : clip.marker("finish");
-        Vec3 a = AbilityHelper.toWorld(clip.point(AnimationClip.RIGHT_TIP, from, local), origin, yaw, mirror);
-        Vec3 b = AbilityHelper.toWorld(clip.point(AnimationClip.RIGHT_TIP, to, local), origin, yaw, mirror);
-        Vec3 middle = a.add(b).scale(0.5);
+        Vec3 startPoint = AbilityHelper.toWorld(clip.point(AnimationClip.RIGHT_TIP, from, local), origin, yaw, mirror);
+        Vec3 endPoint = AbilityHelper.toWorld(clip.point(AnimationClip.RIGHT_TIP, to, local), origin, yaw, mirror);
+        Vec3 middle = startPoint.add(endPoint).scale(0.5);
         Vec3 out = new Vec3(middle.x - origin.x, 0, middle.z - origin.z).normalize();
-        Vec3 edge = b.subtract(a);
+        Vec3 edge = endPoint.subtract(startPoint);
         return new SlashWave(middle, edge.normalize(), out, (float) edge.length() * 0.5F, 0.95F, range, 0.11F, 1.3F);
     }
 

@@ -51,10 +51,10 @@ public class SlashMark {
         Vec3[] outer = new Vec3[count];
         for (int i = 0; i < count; i++) {
             float lineOffset = (float) i / (count - 1) * 2.0F - 1.0F;
-            Vec3 position = center.add(direction.scale(lineOffset * length * 0.5F));
+            Vec3 slashPoint = center.add(direction.scale(lineOffset * length * 0.5F));
             Vec3 side = across.scale(width * (1.0F - lineOffset * lineOffset));
-            inner[i] = position.subtract(side);
-            outer[i] = position.add(side);
+            inner[i] = slashPoint.subtract(side);
+            outer[i] = slashPoint.add(side);
         }
         return new SlashMark(inner, outer, blade, time, seed);
     }

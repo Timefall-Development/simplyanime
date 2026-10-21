@@ -103,13 +103,13 @@ public class ArmChainLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         Vec3 center = flat ? mid : mid.add(out.scale(0.3));
         int shade = flat ? 196 : 128;
 
-        Vec3 a = center.subtract(stretch).subtract(across);
-        Vec3 b = center.add(stretch).subtract(across);
+        Vec3 cornerA = center.subtract(stretch).subtract(across);
+        Vec3 cornerB = center.add(stretch).subtract(across);
         Vec3 cornerC = center.add(stretch).add(across);
         Vec3 cornerD = center.subtract(stretch).add(across);
         Vec3 facing = flat ? out : along.cross(out).normalize();
-        vertex(vertices, matrix, normal, a, facing, shade, light);
-        vertex(vertices, matrix, normal, b, facing, shade, light);
+        vertex(vertices, matrix, normal, cornerA, facing, shade, light);
+        vertex(vertices, matrix, normal, cornerB, facing, shade, light);
         vertex(vertices, matrix, normal, cornerC, facing, shade, light);
         vertex(vertices, matrix, normal, cornerD, facing, shade, light);
     }

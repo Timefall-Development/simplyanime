@@ -177,10 +177,10 @@ public class HeavenMarkVisualEntityRenderer extends EntityRenderer<HeavenMarkVis
             float outer = size * eased * (0.75F + random.nextFloat() * 0.35F);
             Vec3 direction = new Vec3(Mth.cos(angle), 0, Mth.sin(angle));
             Vec3 side = new Vec3(-direction.z, 0, direction.x).scale(0.03);
-            Vec3 a = direction.scale(inner).add(0, 0.05, 0);
-            Vec3 b = direction.scale(outer).add(0, 0.05, 0);
-            flatQuad(vertices, matrix, normal, a.add(side), b.add(side.scale(0.2)), b.subtract(side.scale(0.2)),
-                    a.subtract(side), 255, 255, 255, alpha, 0);
+            Vec3 innerPoint = direction.scale(inner).add(0, 0.05, 0);
+            Vec3 outerPoint = direction.scale(outer).add(0, 0.05, 0);
+            flatQuad(vertices, matrix, normal, innerPoint.add(side), outerPoint.add(side.scale(0.2)), outerPoint.subtract(side.scale(0.2)),
+                    innerPoint.subtract(side), 255, 255, 255, alpha, 0);
         }
     }
 
@@ -244,10 +244,10 @@ public class HeavenMarkVisualEntityRenderer extends EntityRenderer<HeavenMarkVis
             double from = random.nextDouble() * 0.4;
             double to = 0.6 + random.nextDouble() * 0.4;
             Vec3 base = side.scale(lateral).add(0, height, 0);
-            Vec3 a = base.add(path.scale(from));
-            Vec3 b = base.add(path.scale(to));
+            Vec3 startPoint = base.add(path.scale(from));
+            Vec3 endPoint = base.add(path.scale(to));
             Vec3 thick = new Vec3(0, 0.025, 0);
-            coloredQuad(vertices, matrix, normal, a.add(thick), b.add(thick), b.subtract(thick), a.subtract(thick),
+            coloredQuad(vertices, matrix, normal, startPoint.add(thick), endPoint.add(thick), endPoint.subtract(thick), startPoint.subtract(thick),
                     255, 255, 255, 0, alpha);
         }
     }
@@ -269,7 +269,7 @@ public class HeavenMarkVisualEntityRenderer extends EntityRenderer<HeavenMarkVis
     }
 
     private static void disc(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, float radius, float y,
-                             int r, int g, int b, int alpha) {
+                             int red, int green, int blue, int alpha) {
         int segments = 24;
         for (int i = 0; i < segments; i++) {
             float startAngle = i * Mth.TWO_PI / segments;
@@ -277,32 +277,32 @@ public class HeavenMarkVisualEntityRenderer extends EntityRenderer<HeavenMarkVis
             Vec3 center = new Vec3(0, y, 0);
             Vec3 startPoint = new Vec3(Mth.cos(startAngle) * radius, y, Mth.sin(startAngle) * radius);
             Vec3 endPoint = new Vec3(Mth.cos(endAngle) * radius, y, Mth.sin(endAngle) * radius);
-            coloredQuad(vertices, matrix, normal, center, startPoint, endPoint, center, r, g, b, alpha, 0);
+            coloredQuad(vertices, matrix, normal, center, startPoint, endPoint, center, red, green, blue, alpha, 0);
         }
     }
 
-    private static void flatQuad(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 a, Vec3 b, Vec3 cornerC,
+    private static void flatQuad(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 cornerA, Vec3 cornerB, Vec3 cornerC,
                                  Vec3 cornerD, int r, int g, int blue, int alphaA, int alphaB) {
-        coloredQuad(vertices, matrix, normal, a, b, cornerC, cornerD, r, g, blue, alphaA, alphaB);
+        coloredQuad(vertices, matrix, normal, cornerA, cornerB, cornerC, cornerD, r, g, blue, alphaA, alphaB);
     }
 
     // alphaA on a/d, alphaB on b/c
-    private static void coloredQuad(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 a, Vec3 b,
+    private static void coloredQuad(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 cornerA, Vec3 cornerB,
                                     Vec3 cornerC, Vec3 cornerD, int r, int g, int blue, int alphaA, int alphaB) {
-        vertex(vertices, matrix, normal, a, r, g, blue, alphaA);
-        vertex(vertices, matrix, normal, b, r, g, blue, alphaB);
+        vertex(vertices, matrix, normal, cornerA, r, g, blue, alphaA);
+        vertex(vertices, matrix, normal, cornerB, r, g, blue, alphaB);
         vertex(vertices, matrix, normal, cornerC, r, g, blue, alphaB);
         vertex(vertices, matrix, normal, cornerD, r, g, blue, alphaA);
 
         vertex(vertices, matrix, normal, cornerD, r, g, blue, alphaA);
         vertex(vertices, matrix, normal, cornerC, r, g, blue, alphaB);
-        vertex(vertices, matrix, normal, b, r, g, blue, alphaB);
-        vertex(vertices, matrix, normal, a, r, g, blue, alphaA);
+        vertex(vertices, matrix, normal, cornerB, r, g, blue, alphaB);
+        vertex(vertices, matrix, normal, cornerA, r, g, blue, alphaA);
     }
 
-    private static void vertex(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 position,
-                               int r, int g, int b, int alpha) {
-        ClientPlatform.entityVertex(vertices, matrix, normal, (float) position.x, (float) position.y, (float) position.z,
-                r, g, b, Mth.clamp(alpha, 0, 255), 0.5F, 0.5F, FULL_BRIGHT, 0.0F, 1.0F, 0.0F);
+    private static void vertex(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 point,
+                               int red, int green, int blue, int alpha) {
+        ClientPlatform.entityVertex(vertices, matrix, normal, (float) point.x, (float) point.y, (float) point.z,
+                red, green, blue, Mth.clamp(alpha, 0, 255), 0.5F, 0.5F, FULL_BRIGHT, 0.0F, 1.0F, 0.0F);
     }
 }

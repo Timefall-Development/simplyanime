@@ -97,21 +97,21 @@ public final class AddonRenderTypes extends RenderType {
     private static final int SOLID = 4;
     private static final Set<RenderType> SOLIDS = new HashSet<>();
 
-    private static final Function<PackKey, RenderType> PACK = Util.memoize(key -> {
-        boolean forward = key.kind == FORWARD_ADD || key.kind == FORWARD_BLEND;
-        boolean additive = key.kind == ADD || key.kind == FORWARD_ADD;
+    private static final Function<PackKey, RenderType> PACK = Util.memoize(packKey -> {
+        boolean forward = packKey.kind == FORWARD_ADD || packKey.kind == FORWARD_BLEND;
+        boolean additive = packKey.kind == ADD || packKey.kind == FORWARD_ADD;
         CompositeState.CompositeStateBuilder builder = CompositeState.builder()
                 .setShaderState(forward ? RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER : RENDERTYPE_BEACON_BEAM_SHADER)
-                .setTextureState(new TextureStateShard(key.texture, key.smooth, false))
-                .setTransparencyState(key.kind == SOLID ? NO_TRANSPARENCY : additive ? LIGHTNING_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY)
-                .setWriteMaskState(key.kind == SOLID ? COLOR_DEPTH_WRITE : COLOR_WRITE)
+                .setTextureState(new TextureStateShard(packKey.texture, packKey.smooth, false))
+                .setTransparencyState(packKey.kind == SOLID ? NO_TRANSPARENCY : additive ? LIGHTNING_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY)
+                .setWriteMaskState(packKey.kind == SOLID ? COLOR_DEPTH_WRITE : COLOR_WRITE)
                 .setCullState(NO_CULL);
         if (forward) {
             builder.setOverlayState(OVERLAY).setLightmapState(LIGHTMAP);
         }
-        return RenderType.create("simplyanime_pack_" + key.kind + (key.smooth ? "_soft" : ""),
+        return RenderType.create("simplyanime_pack_" + packKey.kind + (packKey.smooth ? "_soft" : ""),
                 DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 262144, false,
-                key.kind != SOLID, builder.createCompositeState(false));
+                packKey.kind != SOLID, builder.createCompositeState(false));
     });
 
     private static RenderType pack(ResourceLocation id, boolean smooth, boolean additive) {

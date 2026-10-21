@@ -42,7 +42,7 @@ public class BladeCinematics {
                 continue;
             }
             float near = (float) Mth.clamp(1.0 - skill.position().distanceTo(eye) / 40.0, 0.0, 1.0);
-            float[] seen = SEEN.computeIfAbsent(skill, key -> new float[]{-100.0F, -1.0F, -1.0F, -1.0F});
+            float[] seen = SEEN.computeIfAbsent(skill, trackedSkill -> new float[]{-100.0F, -1.0F, -1.0F, -1.0F});
             boolean mine = skill.getOwner() == client.player;
             if (mine && skill.isRunning()) {
                 boolean stream = skill.getSkill() == BladeSkill.STARBURST_STREAM;
@@ -116,9 +116,9 @@ public class BladeCinematics {
     }
 
     private static void fill(GuiGraphics context, int rgb, float alpha) {
-        int a = (int) (Mth.clamp(alpha, 0.0F, 1.0F) * 255);
-        if (a > 1) {
-            context.fill(0, 0, context.guiWidth(), context.guiHeight(), (a << 24) | rgb);
+        int alphaByte = (int) (Mth.clamp(alpha, 0.0F, 1.0F) * 255);
+        if (alphaByte > 1) {
+            context.fill(0, 0, context.guiWidth(), context.guiHeight(), (alphaByte << 24) | rgb);
         }
     }
 

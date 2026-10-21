@@ -82,7 +82,7 @@ public class SunGlowParticle extends TextureSheetParticle {
         }
         // streak back along the velocity, facing the camera
         Vec3 cam = camera.getPosition();
-        Vec3 position = new Vec3(Mth.lerp(partialTick, this.xo, this.x) - cam.x,
+        Vec3 fromCamera = new Vec3(Mth.lerp(partialTick, this.xo, this.x) - cam.x,
                 Mth.lerp(partialTick, this.yo, this.y) - cam.y,
                 Mth.lerp(partialTick, this.zo, this.z) - cam.z);
         Vec3 motion = new Vec3(this.xd, this.yd, this.zd);
@@ -92,13 +92,13 @@ public class SunGlowParticle extends TextureSheetParticle {
             return;
         }
         Vec3 direction = motion.scale(1.0 / speed);
-        Vec3 side = direction.cross(position);
+        Vec3 side = direction.cross(fromCamera);
         if (side.lengthSqr() < 1.0E-8) {
             return;
         }
         side = side.normalize().scale(this.quadSize);
-        Vec3 tail = position.subtract(direction.scale(this.quadSize * 2.0 + speed * 2.2));
-        Vec3 head = position.add(direction.scale(this.quadSize));
+        Vec3 tail = fromCamera.subtract(direction.scale(this.quadSize * 2.0 + speed * 2.2));
+        Vec3 head = fromCamera.add(direction.scale(this.quadSize));
         int light = 0xF000F0;
         float minU = this.getU0();
         float maxU = this.getU1();

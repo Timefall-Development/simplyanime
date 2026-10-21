@@ -112,7 +112,7 @@ public class BladeSkillManager {
                 context.stack().copy(), skill, world.getGameTime(), visual.getUUID(), mirror);
         cast.yaw = actor.getYHeadRot();
         cast.center = actor.position();
-        CASTS.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUUID(), cast);
+        CASTS.computeIfAbsent(world, serverLevel -> new HashMap<>()).put(actor.getUUID(), cast);
 
         switch (skill) {
             case VORPAL_STRIKE -> {
@@ -263,12 +263,12 @@ public class BladeSkillManager {
         float cos = Mth.cos(angle);
         float sin = Mth.sin(angle);
         for (Entity entity : world.getEntities(actor, new AABB(cast.center, cast.center).inflate(half * 1.5 + 2.0, 4.0, half * 1.5 + 2.0))) {
-            Vec3 position = entity.getBoundingBox().getCenter().subtract(cast.center);
-            double x = position.x * cos + position.z * sin;
-            double z = -position.x * sin + position.z * cos;
+            Vec3 offsetFromCast = entity.getBoundingBox().getCenter().subtract(cast.center);
+            double x = offsetFromCast.x * cos + offsetFromCast.z * sin;
+            double z = -offsetFromCast.x * sin + offsetFromCast.z * cos;
             double reach = Math.max(Math.abs(x), Math.abs(z)) - entity.getBbWidth() * 0.5;
-            if (reach <= half + 0.6 && Math.abs(position.y - 1.0) <= 3.0) {
-                Vec3 out = new Vec3(position.x, 0, position.z);
+            if (reach <= half + 0.6 && Math.abs(offsetFromCast.y - 1.0) <= 3.0) {
+                Vec3 out = new Vec3(offsetFromCast.x, 0, offsetFromCast.z);
                 Vec3 push = out.lengthSqr() < 1.0E-4 ? Vec3.ZERO : out.normalize().scale(settings.knockback);
                 land(world, cast, actor, entity, cast.struck, damage, push.add(0, 0.3 * settings.knockback, 0),
                         ParticlesRegistry.FROST_SHARD.get());
@@ -338,10 +338,10 @@ public class BladeSkillManager {
         while (iterator.hasNext()) {
             SlashWave wave = iterator.next();
             if (wave.damage > 0) {
-                Vec3 position = wave.centerAt(wave.age);
+                Vec3 waveCenter = wave.centerAt(wave.age);
                 double reach = wave.halfAt(wave.age) + wave.thickness + wave.speed + 2.0;
                 Vec3 push = wave.direction.scale(wave.knockback).add(0, 0.2 * wave.knockback, 0);
-                for (Entity entity : world.getEntities(actor, new AABB(position, position).inflate(reach))) {
+                for (Entity entity : world.getEntities(actor, new AABB(waveCenter, waveCenter).inflate(reach))) {
                     AABB box = entity.getBoundingBox();
                     if (wave.touches(box, wave.age) || wave.age > 0 && wave.touches(box, wave.age - 0.5F)) {
                         land(world, cast, actor, entity, wave.struck, wave.damage, push, ParticlesRegistry.FROST_SHARD.get());
@@ -361,16 +361,16 @@ public class BladeSkillManager {
         if (root == null || root == actor || !struck.add(root.getUUID())) {
             return;
         }
-        Vec3 position = AbilityHelper.strike(world, actor, cast.ownerId, cast.stack, entity, root, damage);
-        if (position == null) {
+        Vec3 hitPoint = AbilityHelper.strike(world, actor, cast.ownerId, cast.stack, entity, root, damage);
+        if (hitPoint == null) {
             return;
         }
         if (root instanceof LivingEntity) {
             root.push(push.x, push.y, push.z);
             root.hurtMarked = true;
         }
-        world.sendParticles(spark, position.x, position.y, position.z, 10, 0.3, 0.3, 0.3, 0.3);
-        sound(world, position, SoundRegistry.BLADE_HIT.get(), 1.0F, 0.9F + world.getRandom().nextFloat() * 0.3F);
+        world.sendParticles(spark, hitPoint.x, hitPoint.y, hitPoint.z, 10, 0.3, 0.3, 0.3, 0.3);
+        sound(world, hitPoint, SoundRegistry.BLADE_HIT.get(), 1.0F, 0.9F + world.getRandom().nextFloat() * 0.3F);
     }
 
     private static Vec3 aim(ServerLevel world, BladeSkillCast cast, LivingEntity actor) {
@@ -391,8 +391,8 @@ public class BladeSkillManager {
         actor.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, level, false, false, false));
     }
 
-    private static void sound(ServerLevel world, Vec3 position, SoundEvent sound, float volume, float pitch) {
-        AbilityHelper.playSound(world, position, sound, volume, pitch);
+    private static void sound(ServerLevel world, Vec3 soundPoint, SoundEvent sound, float volume, float pitch) {
+        AbilityHelper.playSound(world, soundPoint, sound, volume, pitch);
     }
 
     private static void abort(ServerLevel world, BladeSkillCast cast, @Nullable LivingEntity actor) {

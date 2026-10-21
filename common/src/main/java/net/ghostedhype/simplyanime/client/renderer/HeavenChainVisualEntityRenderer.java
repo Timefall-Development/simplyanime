@@ -128,8 +128,8 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
             float fadeB = 1.0F - (float) (i + 1) / (count - 1);
             float widthA = 0.75F * (float) Math.pow(fadeA, 0.6) * strength;
             float widthB = 0.75F * (float) Math.pow(fadeB, 0.6) * strength;
-            Vec3 a = points.get(i);
-            Vec3 b = points.get(i + 1);
+            Vec3 startPoint = points.get(i);
+            Vec3 endPoint = points.get(i + 1);
             Vec3 startOffset = widths.get(i).scale(widthA);
             Vec3 endOffset = widths.get(i + 1).scale(widthB);
 
@@ -137,19 +137,19 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
             int darkA = (int) (220 * fadeA * strength);
             int darkB = (int) (220 * fadeB * strength);
             quad(vertices, matrix, normal,
-                    a.add(startOffset), b.add(endOffset), b.add(endOffset.scale(0.45)), a.add(startOffset.scale(0.45)),
+                    startPoint.add(startOffset), endPoint.add(endOffset), endPoint.add(endOffset.scale(0.45)), startPoint.add(startOffset.scale(0.45)),
                     10, 10, darkA, darkB, FULL_BRIGHT);
 
             int shadeA = (int) Mth.lerpInt(1.0F - fadeA, 255, 40);
             int shadeB = (int) Mth.lerpInt(1.0F - fadeB, 255, 40);
             quad(vertices, matrix, normal,
-                    a.add(startOffset.scale(0.45)), b.add(endOffset.scale(0.45)),
-                    b.subtract(endOffset.scale(0.45)), a.subtract(startOffset.scale(0.45)),
+                    startPoint.add(startOffset.scale(0.45)), endPoint.add(endOffset.scale(0.45)),
+                    endPoint.subtract(endOffset.scale(0.45)), startPoint.subtract(startOffset.scale(0.45)),
                     shadeA, shadeB, (int) (245 * fadeA * strength), (int) (245 * fadeB * strength), FULL_BRIGHT);
 
             quad(vertices, matrix, normal,
-                    a.subtract(startOffset.scale(0.45)), b.subtract(endOffset.scale(0.45)),
-                    b.subtract(endOffset.scale(0.65)), a.subtract(startOffset.scale(0.65)),
+                    startPoint.subtract(startOffset.scale(0.45)), endPoint.subtract(endOffset.scale(0.45)),
+                    endPoint.subtract(endOffset.scale(0.65)), startPoint.subtract(startOffset.scale(0.65)),
                     10, 10, darkA / 2, darkB / 2, FULL_BRIGHT);
         }
     }
@@ -162,11 +162,11 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
         for (int i = 0; i < points.size() - 1; i++) {
             float fadeA = 1.0F - (float) i / points.size();
             float fadeB = 1.0F - (float) (i + 1) / points.size();
-            Vec3 a = points.get(i).subtract(origin);
-            Vec3 b = points.get(i + 1).subtract(origin);
+            Vec3 startPoint = points.get(i).subtract(origin);
+            Vec3 endPoint = points.get(i + 1).subtract(origin);
             quad(vertices, matrix, normal,
-                    a.add(0, 0.18 * fadeA, 0), b.add(0, 0.18 * fadeB, 0),
-                    b.subtract(0, 0.18 * fadeB, 0), a.subtract(0, 0.18 * fadeA, 0),
+                    startPoint.add(0, 0.18 * fadeA, 0), endPoint.add(0, 0.18 * fadeB, 0),
+                    endPoint.subtract(0, 0.18 * fadeB, 0), startPoint.subtract(0, 0.18 * fadeA, 0),
                     (int) (230 * fadeA), (int) (230 * fadeB), (int) (200 * fadeA), (int) (200 * fadeB), FULL_BRIGHT);
         }
     }
@@ -187,23 +187,23 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
         for (int k = 0; k < links; k++) {
             double start = k * LINK_LENGTH - 0.02;
             double end = Math.min(length, (k + 1) * LINK_LENGTH + 0.02);
-            Vec3 a = from.add(direction.scale(start));
-            Vec3 b = from.add(direction.scale(end));
+            Vec3 startPoint = from.add(direction.scale(start));
+            Vec3 endPoint = from.add(direction.scale(end));
             Vec3 across = (k & 1) == 0 ? side : side2;
             int shade = (k & 1) == 0 ? 165 : 120;
             for (int bar = -1; bar <= 1; bar += 2) {
                 Vec3 offset = across.scale(0.045 * bar);
                 Vec3 thickness = across.scale(0.016);
                 quad(vertices, matrix, normal,
-                        a.add(offset).add(thickness), b.add(offset).add(thickness),
-                        b.add(offset).subtract(thickness), a.add(offset).subtract(thickness),
+                        startPoint.add(offset).add(thickness), endPoint.add(offset).add(thickness),
+                        endPoint.add(offset).subtract(thickness), startPoint.add(offset).subtract(thickness),
                         shade, shade, 255, 255, light);
             }
         }
     }
 
     private void renderBlade(HeavenChainVisualEntity entity, PoseStack poseStack,
-                             MultiBufferSource buffers, Vec3 position, Vec3 pointing, float spinTime, int light) {
+                             MultiBufferSource buffers, Vec3 bladePoint, Vec3 pointing, float spinTime, int light) {
         ItemStack stack = entity.getStack();
         if (stack.isEmpty()) {
             return;
@@ -213,7 +213,7 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
         float pitchDeg = (float) (-Math.asin(Mth.clamp(direction.y, -1.0, 1.0)) * Mth.RAD_TO_DEG);
 
         poseStack.pushPose();
-        poseStack.translate(position.x, position.y, position.z);
+        poseStack.translate(bladePoint.x, bladePoint.y, bladePoint.z);
         poseStack.mulPose(Axis.YP.rotationDegrees(yawDeg));
         poseStack.mulPose(Axis.XP.rotationDegrees(pitchDeg));
         poseStack.translate(0.0, 0.0, 0.32);
@@ -238,31 +238,31 @@ public class HeavenChainVisualEntityRenderer extends EntityRenderer<HeavenChainV
         float bodyYaw = Mth.rotLerp(partialTick, owner.yBodyRotO, owner.yBodyRot) * Mth.DEG_TO_RAD;
         double side = owner.getMainArm() == HumanoidArm.LEFT ? -1.0 : 1.0;
         Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0, -Mth.sin(bodyYaw)).scale(side);
-        Vec3 position = owner.getPosition(partialTick);
+        Vec3 ownerPoint = owner.getPosition(partialTick);
         if (!armOut) {
-            return position.add(right.scale(0.38)).add(0, owner.getBbHeight() * 0.42, 0);
+            return ownerPoint.add(right.scale(0.38)).add(0, owner.getBbHeight() * 0.42, 0);
         }
         return InvertedSpearPoses.spinHandPos(owner, chain, partialTick);
     }
 
     // both windings, culling was eating half of it
-    static void quad(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 a, Vec3 b, Vec3 cornerC, Vec3 cornerD,
+    static void quad(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 cornerA, Vec3 cornerB, Vec3 cornerC, Vec3 cornerD,
                      int shadeAD, int shadeBC, int alphaAD, int alphaBC, int light) {
-        vertex(vertices, matrix, normal, a, shadeAD, alphaAD, light);
-        vertex(vertices, matrix, normal, b, shadeBC, alphaBC, light);
+        vertex(vertices, matrix, normal, cornerA, shadeAD, alphaAD, light);
+        vertex(vertices, matrix, normal, cornerB, shadeBC, alphaBC, light);
         vertex(vertices, matrix, normal, cornerC, shadeBC, alphaBC, light);
         vertex(vertices, matrix, normal, cornerD, shadeAD, alphaAD, light);
 
         vertex(vertices, matrix, normal, cornerD, shadeAD, alphaAD, light);
         vertex(vertices, matrix, normal, cornerC, shadeBC, alphaBC, light);
-        vertex(vertices, matrix, normal, b, shadeBC, alphaBC, light);
-        vertex(vertices, matrix, normal, a, shadeAD, alphaAD, light);
+        vertex(vertices, matrix, normal, cornerB, shadeBC, alphaBC, light);
+        vertex(vertices, matrix, normal, cornerA, shadeAD, alphaAD, light);
     }
 
-    private static void vertex(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 position,
+    private static void vertex(VertexConsumer vertices, Matrix4f matrix, Matrix3f normal, Vec3 point,
                                int shade, int alpha, int light) {
-        int a = Mth.clamp(alpha, 0, 255);
-        ClientPlatform.entityVertex(vertices, matrix, normal, (float) position.x, (float) position.y, (float) position.z,
-                shade, shade, shade, a, 0.5F, 0.5F, light, 0.0F, 1.0F, 0.0F);
+        int alphaByte = Mth.clamp(alpha, 0, 255);
+        ClientPlatform.entityVertex(vertices, matrix, normal, (float) point.x, (float) point.y, (float) point.z,
+                shade, shade, shade, alphaByte, 0.5F, 0.5F, light, 0.0F, 1.0F, 0.0F);
     }
 }

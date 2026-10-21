@@ -40,17 +40,17 @@ public class RhittaCinematics {
             }
             int phase = sun.getPhase();
             float ticks = sun.getPhaseTicks(0.0F);
-            float[] seen = SEEN.computeIfAbsent(sun, key -> new float[]{-1, -1});
+            float[] seen = SEEN.computeIfAbsent(sun, trackedSun -> new float[]{-1, -1});
             LivingEntity owner = sun.getOwner();
 
             if (phase == CruelSunEntity.PHASE_CHARGE && owner != null) {
                 float orb = sun.getOrbRadius(0.0F);
-                Vec3 position = CruelSunEntity.chargeCenter(owner, 1.0F, orb);
-                float near = (float) Mth.clamp(1.0 - position.distanceTo(eye) / (48.0 + orb * 4.0), 0.0, 1.0);
+                Vec3 chargePoint = CruelSunEntity.chargeCenter(owner, 1.0F, orb);
+                float near = (float) Mth.clamp(1.0 - chargePoint.distanceTo(eye) / (48.0 + orb * 4.0), 0.0, 1.0);
                 if (owner == client.player) {
                     // far enough back to fit the whole sun
                     float boost = 20.0F * Math.min(1.0F, orb / 6.0F);
-                    double top = position.y - owner.getY() + orb * CruelSunEntity.HEAT_EDGE;
+                    double top = chargePoint.y - owner.getY() + orb * CruelSunEntity.HEAT_EDGE;
                     double wide = orb * CruelSunEntity.HEAT_EDGE;
                     double half = Math.toRadians((client.options.fov().get() + boost) * 0.5);
                     double needed = Math.max(top, wide) / Math.tan(half) * 1.2;
@@ -134,9 +134,9 @@ public class RhittaCinematics {
     }
 
     private static void fill(GuiGraphics context, int width, int height, int rgb, float alpha) {
-        int a = (int) (Mth.clamp(alpha, 0.0F, 1.0F) * 255);
-        if (a > 1) {
-            context.fill(0, 0, width, height, (a << 24) | rgb);
+        int alphaByte = (int) (Mth.clamp(alpha, 0.0F, 1.0F) * 255);
+        if (alphaByte > 1) {
+            context.fill(0, 0, width, height, (alphaByte << 24) | rgb);
         }
     }
 }

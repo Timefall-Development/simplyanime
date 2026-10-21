@@ -64,9 +64,9 @@ public class Later {
 
     private static boolean submerged(Entity entity) {
         Level level = entity.level();
-        Vec3 position = entity.position();
-        return !level.getFluidState(BlockPos.containing(position.x, position.y + 0.2, position.z)).isEmpty()
-                && !level.getFluidState(BlockPos.containing(position.x, position.y + 1.6, position.z)).isEmpty();
+        Vec3 entityPoint = entity.position();
+        return !level.getFluidState(BlockPos.containing(entityPoint.x, entityPoint.y + 0.2, entityPoint.z)).isEmpty()
+                && !level.getFluidState(BlockPos.containing(entityPoint.x, entityPoint.y + 1.6, entityPoint.z)).isEmpty();
     }
 
     // called when the translucent blocks are in

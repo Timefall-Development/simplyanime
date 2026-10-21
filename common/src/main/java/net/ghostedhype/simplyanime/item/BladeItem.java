@@ -64,9 +64,9 @@ public abstract class BladeItem extends AnimeWeaponItem {
     }
 
     private static int mix(int from, int to, float progress) {
-        int r = (int) ((from >> 16 & 255) + ((to >> 16 & 255) - (from >> 16 & 255)) * progress);
-        int g = (int) ((from >> 8 & 255) + ((to >> 8 & 255) - (from >> 8 & 255)) * progress);
-        int b = (int) ((from & 255) + ((to & 255) - (from & 255)) * progress);
-        return r << 16 | g << 8 | b;
+        int red = (int) ((from >> 16 & 255) + ((to >> 16 & 255) - (from >> 16 & 255)) * progress);
+        int green = (int) ((from >> 8 & 255) + ((to >> 8 & 255) - (from >> 8 & 255)) * progress);
+        int blue = (int) ((from & 255) + ((to & 255) - (from & 255)) * progress);
+        return red << 16 | green << 8 | blue;
     }
 }

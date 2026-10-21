@@ -187,24 +187,24 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             // slid along the screen, in steps
             float slide = (float) Math.floor((hash(mark.seed + i * 7 + beat, 4) - 0.5F) * 6.0F) * 0.14F * Math.min(1.0F, age / 8.0F);
             Vec3 shift = this.camRight.scale(slide);
-            Vec3 a = inward.lerp(out, 0.84).add(shift);
-            Vec3 b = out.add(shift);
+            Vec3 innerEdge = inward.lerp(out, 0.84).add(shift);
+            Vec3 outerEdge = out.add(shift);
             Vec3 cornerC = outNext.add(shift);
             Vec3 cornerD = inNext.lerp(outNext, 0.84).add(shift);
             int[] color = key > 0.86F ? WHITE : body;
             float alpha = left * (0.45F + 0.55F * key);
-            this.quad(buffer, a, color, alpha * 0.4F, b, color, alpha, cornerC, color, alpha, cornerD, color, alpha * 0.4F);
+            this.quad(buffer, innerEdge, color, alpha * 0.4F, outerEdge, color, alpha, cornerC, color, alpha, cornerD, color, alpha * 0.4F);
             Vec3 apart = this.camRight.scale(0.22);
-            this.quad(buffer, a.add(apart), ghost, 0.0F, b.add(apart), ghost, alpha * 0.45F, cornerC.add(apart), ghost, alpha * 0.45F,
+            this.quad(buffer, innerEdge.add(apart), ghost, 0.0F, outerEdge.add(apart), ghost, alpha * 0.45F, cornerC.add(apart), ghost, alpha * 0.45F,
                     cornerD.add(apart), ghost, 0.0F);
             if (key > 0.9F) {
                 // a square knocked loose
                 float size = 0.07F + 0.12F * hash(mark.seed + i, 5);
-                Vec3 position = out.add(this.camRight.scale(slide * 3.0F)).add(this.camUp.scale((hash(mark.seed + i, 6) - 0.5F) * 0.8F));
+                Vec3 markPoint = out.add(this.camRight.scale(slide * 3.0F)).add(this.camUp.scale((hash(mark.seed + i, 6) - 0.5F) * 0.8F));
                 Vec3 right = this.camRight.scale(size);
                 Vec3 upward = this.camUp.scale(size);
-                this.quad(buffer, position.subtract(right).subtract(upward), rim, left, position.add(right).subtract(upward), rim, left,
-                        position.add(right).add(upward), rim, left, position.subtract(right).add(upward), rim, left);
+                this.quad(buffer, markPoint.subtract(right).subtract(upward), rim, left, markPoint.add(right).subtract(upward), rim, left,
+                        markPoint.add(right).add(upward), rim, left, markPoint.subtract(right).add(upward), rim, left);
             }
         }
     }
@@ -224,16 +224,16 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             }
             Vec3 base = trail.base(i);
             Vec3 reach = trail.tip(i).subtract(base);
-            Vec3 a = base.add(reach.scale(from));
-            Vec3 b = base.add(reach.scale(to));
+            Vec3 startPoint = base.add(reach.scale(from));
+            Vec3 endPoint = base.add(reach.scale(to));
             float fade = 1.0F - age / life;
             float strength = trail.heat(i) * fade * fade;
             if (lastA != null && (strength > 0.01F || lastStrength > 0.01F)) {
                 this.quad(buffer, lastA, inner, innerAlpha * lastStrength, lastB, outer, outerAlpha * lastStrength,
-                        b, outer, outerAlpha * strength, a, inner, innerAlpha * strength);
+                        endPoint, outer, outerAlpha * strength, startPoint, inner, innerAlpha * strength);
             }
-            lastA = a;
-            lastB = b;
+            lastA = startPoint;
+            lastB = endPoint;
             lastStrength = strength;
         }
     }
@@ -383,13 +383,13 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             float angle = distance * 1.1F - spin * 0.9F;
             float wide = radius * 1.15F * thick * Math.min(1.0F, distance / 3.0F) * Math.min(1.0F, (reach - distance) / 4.0F);
             Vec3 around = side.scale(Mth.cos(angle)).add(other.scale(Mth.sin(angle)));
-            Vec3 a = start.add(aim.scale(distance)).add(around.scale(wide));
-            Vec3 b = a.add(aim.scale(0.55)).add(around.scale(0.12));
+            Vec3 sparkStart = start.add(aim.scale(distance)).add(around.scale(wide));
+            Vec3 sparkEnd = sparkStart.add(aim.scale(0.55)).add(around.scale(0.12));
             if (lastA != null) {
-                this.quad(glow, lastA, CRIMSON, 0.75F * thick, lastB, EMBER, 0.0F, b, EMBER, 0.0F, a, CRIMSON, 0.75F * thick);
+                this.quad(glow, lastA, CRIMSON, 0.75F * thick, lastB, EMBER, 0.0F, sparkEnd, EMBER, 0.0F, sparkStart, CRIMSON, 0.75F * thick);
             }
-            lastA = a;
-            lastB = b;
+            lastA = sparkStart;
+            lastB = sparkEnd;
         }
         for (int i = 0; i < 11; i++) {
             float distance = 1.5F + i * (length - 3.0F) / 11.0F;
@@ -470,11 +470,11 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             float closed = Mth.clamp((now - entity.cornerTimes.get(4)) / 3.0F, 0.0F, 1.0F);
             float sheet = released < 0 ? 0.22F * closed : 0.6F * Math.max(0.0F, 1.0F - released / 5.0F);
             if (sheet > 0.01F) {
-                Vec3 a = center.add(corners.get(0).subtract(center).scale(grow));
-                Vec3 b = center.add(corners.get(1).subtract(center).scale(grow));
+                Vec3 cornerA = center.add(corners.get(0).subtract(center).scale(grow));
+                Vec3 cornerB = center.add(corners.get(1).subtract(center).scale(grow));
                 Vec3 cornerC = center.add(corners.get(2).subtract(center).scale(grow));
                 Vec3 cornerD = center.add(corners.get(3).subtract(center).scale(grow));
-                this.quad(glow, a, TEAL, sheet, b, TEAL, sheet, cornerC, TEAL, sheet, cornerD, TEAL, sheet);
+                this.quad(glow, cornerA, TEAL, sheet, cornerB, TEAL, sheet, cornerC, TEAL, sheet, cornerD, TEAL, sheet);
             }
             this.ring(glow, center, new Vec3(1, 0, 0), new Vec3(0, 0, 1), 0.9F + 0.2F * Mth.sin(spin * 0.4F), 0.07F, FROST,
                     0.7F * closed * strength, spin * 0.2F, 32);
@@ -551,11 +551,11 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
         Vec3[][] planes = {{east, south}, {east, UP}, {south, UP}};
         for (int i = 0; i < planes.length; i++) {
             float turn = spin * 0.03F + i;
-            Vec3 a = planes[i][0].scale(Mth.cos(turn)).add(planes[i][1].scale(Mth.sin(turn)));
-            Vec3 b = planes[i][0].scale(-Mth.sin(turn)).add(planes[i][1].scale(Mth.cos(turn)));
-            Vec3 lift = a.cross(b);
-            this.ring(glow, center, a, lift, radius * open, 0.5F * fade, i == 1 ? TEAL : STARLIGHT, 0.85F * fade, 0.0F, 72);
-            this.ring(glow, center, a, lift, radius * open * 0.62F, 0.25F * fade, WHITE, 0.8F * fade, 0.0F, 56);
+            Vec3 firstAxis = planes[i][0].scale(Mth.cos(turn)).add(planes[i][1].scale(Mth.sin(turn)));
+            Vec3 secondAxis = planes[i][0].scale(-Mth.sin(turn)).add(planes[i][1].scale(Mth.cos(turn)));
+            Vec3 lift = firstAxis.cross(secondAxis);
+            this.ring(glow, center, firstAxis, lift, radius * open, 0.5F * fade, i == 1 ? TEAL : STARLIGHT, 0.85F * fade, 0.0F, 72);
+            this.ring(glow, center, firstAxis, lift, radius * open * 0.62F, 0.25F * fade, WHITE, 0.8F * fade, 0.0F, 56);
         }
         // points of the star
         for (int i = 0; i < 16; i++) {
@@ -616,9 +616,9 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
             return;
         }
         int light = this.entityRenderDispatcher.getPackedLightCoords(owner, partialTick);
-        Vec3 ownerPosition = owner.getPosition(partialTick).subtract(this.origin);
+        Vec3 ownerOffset = owner.getPosition(partialTick).subtract(this.origin);
         poseStack.pushPose();
-        poseStack.translate(ownerPosition.x, ownerPosition.y, ownerPosition.z);
+        poseStack.translate(ownerOffset.x, ownerOffset.y, ownerOffset.z);
         BladePoses.root(owner, poseStack, partialTick);
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - Mth.rotLerp(partialTick, owner.yBodyRotO, owner.yBodyRot)));
         poseStack.scale(-0.9375F, -0.9375F, 0.9375F);
@@ -650,15 +650,15 @@ public class BladeSkillRenderer extends EntityRenderer<BladeSkillEntity> {
         poseStack.popPose();
     }
 
-    private void vertex(VfxBuffer buffer, Vec3 position, int[] color, float alpha) {
-        buffer.vertex(this.matrix, (float) (position.x - this.origin.x), (float) (position.y - this.origin.y), (float) (position.z - this.origin.z),
+    private void vertex(VfxBuffer buffer, Vec3 point, int[] color, float alpha) {
+        buffer.vertex(this.matrix, (float) (point.x - this.origin.x), (float) (point.y - this.origin.y), (float) (point.z - this.origin.z),
                 color[0], color[1], color[2], (int) (Mth.clamp(alpha * (color == NIGHT ? 1.0F : this.dim), 0.0F, 1.0F) * 255.0F), 0.0F, 0.0F);
     }
 
-    private void quad(VfxBuffer buffer, Vec3 a, int[] colorA, float alphaA, Vec3 b, int[] colorB, float alphaB,
+    private void quad(VfxBuffer buffer, Vec3 cornerA, int[] colorA, float alphaA, Vec3 cornerB, int[] colorB, float alphaB,
                       Vec3 cornerC, int[] colorC, float alphaC, Vec3 cornerD, int[] colorD, float alphaD) {
-        this.vertex(buffer, a, colorA, alphaA);
-        this.vertex(buffer, b, colorB, alphaB);
+        this.vertex(buffer, cornerA, colorA, alphaA);
+        this.vertex(buffer, cornerB, colorB, alphaB);
         this.vertex(buffer, cornerC, colorC, alphaC);
         this.vertex(buffer, cornerD, colorD, alphaD);
     }

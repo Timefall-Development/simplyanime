@@ -35,7 +35,7 @@ public class EffectLights {
         for (Vec3 spot : spots) {
             wanted.add(BlockPos.containing(spot));
         }
-        Set<BlockPos> placed = LIGHTS.computeIfAbsent(owner, key -> new HashSet<>());
+        Set<BlockPos> placed = LIGHTS.computeIfAbsent(owner, entity -> new HashSet<>());
         Iterator<BlockPos> old = placed.iterator();
         while (old.hasNext()) {
             BlockPos position = old.next();

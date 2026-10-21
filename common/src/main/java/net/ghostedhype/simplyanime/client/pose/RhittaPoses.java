@@ -24,7 +24,7 @@ public class RhittaPoses {
 
     public static void tick(ClientLevel world) {
         for (Player player : world.players()) {
-            float[] weights = WEIGHTS.computeIfAbsent(player, ignored -> new float[2]);
+            float[] weights = WEIGHTS.computeIfAbsent(player, trackedPlayer -> new float[2]);
             weights[0] = weights[1];
             float target = idle(player) ? 1.0F : 0.0F;
             // eases in slowly, gets out of the way fast for a swing

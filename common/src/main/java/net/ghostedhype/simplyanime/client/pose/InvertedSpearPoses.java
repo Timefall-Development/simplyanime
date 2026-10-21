@@ -123,9 +123,9 @@ public class InvertedSpearPoses {
     }
 
     private static Vec3 spinArmDirection(LivingEntity entity, HeavenChainVisualEntity ability, float partialTick) {
-        Vec3 position = entity.getPosition(partialTick);
+        Vec3 entityOrigin = entity.getPosition(partialTick);
         Vec3 blade = ability.bladePos(entity, partialTick);
-        Vec3 flat = new Vec3(blade.x - position.x, 0, blade.z - position.z);
+        Vec3 flat = new Vec3(blade.x - entityOrigin.x, 0, blade.z - entityOrigin.z);
         float bodyYaw = Mth.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot) * Mth.DEG_TO_RAD;
         Vec3 right = new Vec3(-Mth.cos(bodyYaw), 0, -Mth.sin(bodyYaw));
         Vec3 forward = new Vec3(-Mth.sin(bodyYaw), 0, Mth.cos(bodyYaw));

@@ -82,15 +82,15 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         Vec3 tip = EnumaElishVisualEntity.chargeTip(owner, partialTick).subtract(base);
         Vec3 feet = owner.getPosition(partialTick).subtract(base).add(0, 0.06, 0);
         Vec3 axis = tip.subtract(feet.add(0, owner.getBbHeight() * 0.8, 0)).normalize();
-        Vec3 u = EnumaElishVisualEntity.perpendicular(axis);
-        Vec3 v = axis.cross(u);
+        Vec3 firstAxis = EnumaElishVisualEntity.perpendicular(axis);
+        Vec3 secondAxis = axis.cross(firstAxis);
         float rise = Math.min(1.0F, entity.getPhaseTicks(partialTick) / 10.0F);
 
         VfxBuffer shade = VfxBuffer.of(buffers, AddonRenderTypes.shade());
         for (int i = 0; i < 3; i++) {
             Vec3 center = tip.subtract(axis.scale(0.35 + i * 0.5));
             float radius = (0.5F + i * 0.28F) * (0.6F + 0.7F * progress) * rise;
-            drawSpinningBand(shade, matrix, center, axis, u, v, radius * 1.08F, 0.09F, CRIMSON, 0.55F * rise,
+            drawSpinningBand(shade, matrix, center, axis, firstAxis, secondAxis, radius * 1.08F, 0.09F, CRIMSON, 0.55F * rise,
                     time * (0.35F + i * 0.1F), 0.4F);
         }
 
@@ -98,7 +98,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         for (int i = 0; i < 3; i++) {
             Vec3 center = tip.subtract(axis.scale(0.35 + i * 0.5));
             float radius = (0.5F + i * 0.28F) * (0.6F + 0.7F * progress) * rise;
-            drawSpinningBand(glow, matrix, center, axis, u, v, radius, 0.07F, RED, 0.9F * rise, -time * (0.4F + i * 0.12F), 0.3F);
+            drawSpinningBand(glow, matrix, center, axis, firstAxis, secondAxis, radius, 0.07F, RED, 0.9F * rise, -time * (0.4F + i * 0.12F), 0.3F);
         }
 
         // orb
@@ -123,16 +123,16 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         VfxBuffer glow = VfxBuffer.of(buffers, AddonRenderTypes.glow());
         float eased = 1.0F - (1.0F - progress) * (1.0F - progress);
         float radius = Math.min(entity.getRadius(), 4.0F);
-        Vec3 position = Vec3.ZERO;
-        drawBillboardGlow(glow, matrix, position, camRight, camUp, radius * (1.5F + 3.5F * eased), GOLD, 0.9F);
-        drawBillboardGlow(glow, matrix, position, camRight, camUp, radius * (0.8F + 1.6F * eased), WHITE, 1.0F);
+        Vec3 origin = Vec3.ZERO;
+        drawBillboardGlow(glow, matrix, origin, camRight, camUp, radius * (1.5F + 3.5F * eased), GOLD, 0.9F);
+        drawBillboardGlow(glow, matrix, origin, camRight, camUp, radius * (0.8F + 1.6F * eased), WHITE, 1.0F);
         // star streaks off the flash
         for (int i = 0; i < 8; i++) {
-            float a = i * Mth.TWO_PI / 8 + 0.2F;
-            Vec3 direction = camRight.scale(Mth.cos(a)).add(camUp.scale(Mth.sin(a)));
-            Vec3 side = camRight.scale(-Mth.sin(a)).add(camUp.scale(Mth.cos(a)));
+            float angle = i * Mth.TWO_PI / 8 + 0.2F;
+            Vec3 direction = camRight.scale(Mth.cos(angle)).add(camUp.scale(Mth.sin(angle)));
+            Vec3 side = camRight.scale(-Mth.sin(angle)).add(camUp.scale(Mth.cos(angle)));
             float spikeLength = radius * (2.0F + 4.0F * eased) * (i % 2 == 0 ? 1.0F : 0.6F);
-            drawSpike(glow, matrix, position, direction, side, spikeLength, 0.18F * radius, WHITE, 0.9F);
+            drawSpike(glow, matrix, origin, direction, side, spikeLength, 0.18F * radius, WHITE, 0.9F);
         }
     }
 
@@ -143,8 +143,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             return;
         }
         direction = direction.normalize();
-        Vec3 u = EnumaElishVisualEntity.perpendicular(direction);
-        Vec3 v = direction.cross(u);
+        Vec3 firstAxis = EnumaElishVisualEntity.perpendicular(direction);
+        Vec3 secondAxis = direction.cross(firstAxis);
         float fullRadius = entity.getRadius();
         float thin = EnumaElishVisualEntity.fadeThickness(fade);
         float alpha = 1.0F - fade;
@@ -167,8 +167,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
                 double endDistance = length * (i + 1) / segments;
                 Vec3 startPoint = direction.scale(startDistance);
                 Vec3 endPoint = direction.scale(endDistance);
-                Vec3 startSide = facing(direction, startPoint, camera, u);
-                Vec3 endSide = facing(direction, endPoint, camera, u);
+                Vec3 startSide = facing(direction, startPoint, camera, firstAxis);
+                Vec3 endSide = facing(direction, endPoint, camera, firstAxis);
                 Vec3 startBack = startPoint.subtract(camera.subtract(startPoint).normalize().scale(0.3));
                 Vec3 endBack = endPoint.subtract(camera.subtract(endPoint).normalize().scale(0.3));
                 drawRibbon(depth, matrix, startBack, endBack, startSide, endSide, radius(startDistance, time, fullRadius) * thin * 0.4F,
@@ -179,7 +179,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         for (int k = 0; k < 4; k++) {
             int[] color = k % 2 == 0 ? ABYSS : CRIMSON;
             float strandAlpha = (k % 2 == 0 ? 0.7F : 0.55F) * alpha * inside;
-            drawSwirl(shade, matrix, direction, u, v, camera, length, fullRadius, thin, time, k * Mth.HALF_PI, color, strandAlpha);
+            drawSwirl(shade, matrix, direction, firstAxis, secondAxis, camera, length, fullRadius, thin, time, k * Mth.HALF_PI, color, strandAlpha);
         }
 
         VfxBuffer glow = VfxBuffer.of(buffers, AddonRenderTypes.glow());
@@ -190,8 +190,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             double endDistance = length * (i + 1) / segments;
             Vec3 startPoint = direction.scale(startDistance);
             Vec3 endPoint = direction.scale(endDistance);
-            Vec3 startSide = facing(direction, startPoint, camera, u);
-            Vec3 endSide = facing(direction, endPoint, camera, u);
+            Vec3 startSide = facing(direction, startPoint, camera, firstAxis);
+            Vec3 endSide = facing(direction, endPoint, camera, firstAxis);
             float edgeOn0 = sideOn(direction, startPoint, camera);
             float edgeOn1 = sideOn(direction, endPoint, camera);
             float startRadius = radius(startDistance, time, fullRadius) * thin;
@@ -205,15 +205,15 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             drawRibbon(glow, matrix, startPoint, endPoint, startSide, endSide, startRadius * 0.18F, endRadius * 0.18F, WHITE, alpha * edgeOn0, alpha * edgeOn1);
         }
 
-        drawTube(glow, matrix, direction, u, v, length, fullRadius, thin, time, 0.95F, RED, 0.22F * alpha * inside);
-        drawTube(glow, matrix, direction, u, v, length, fullRadius, thin, time, 0.55F, RED, 0.2F * alpha * inside);
-        drawTube(glow, matrix, direction, u, v, length, fullRadius, thin, time, 0.22F, GOLD, 0.3F * alpha);
+        drawTube(glow, matrix, direction, firstAxis, secondAxis, length, fullRadius, thin, time, 0.95F, RED, 0.22F * alpha * inside);
+        drawTube(glow, matrix, direction, firstAxis, secondAxis, length, fullRadius, thin, time, 0.55F, RED, 0.2F * alpha * inside);
+        drawTube(glow, matrix, direction, firstAxis, secondAxis, length, fullRadius, thin, time, 0.22F, GOLD, 0.3F * alpha);
 
         // muzzle flare + rupture rings
         Vec3 muzzle = direction.scale(0.2);
         float pulse = 1.0F + 0.08F * Mth.sin(time * 1.7F);
         float muzzleSize = EnumaElishVisualEntity.muzzleRadius(fullRadius);
-        drawDisc(glow, matrix, muzzle, u, v, muzzleSize * pulse * thin, GOLD, 0.9F * alpha, 0.0F);
+        drawDisc(glow, matrix, muzzle, firstAxis, secondAxis, muzzleSize * pulse * thin, GOLD, 0.9F * alpha, 0.0F);
         drawBillboardGlow(glow, matrix, muzzle, camRight, camUp, muzzleSize * 0.5F * pulse * thin, WHITE, 0.85F * alpha);
         for (int i = 0; i < 3; i++) {
             double ringRadius = fullRadius * (0.5 + i * 0.8);
@@ -221,7 +221,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
                 break;
             }
             float r = radius(ringRadius, time, fullRadius) * 1.45F * thin * pulse;
-            drawSpinningBand(glow, matrix, direction.scale(ringRadius), direction, u, v, r, 0.05F + r * 0.02F, RED, 0.9F * alpha,
+            drawSpinningBand(glow, matrix, direction.scale(ringRadius), direction, firstAxis, secondAxis, r, 0.05F + r * 0.02F, RED, 0.9F * alpha,
                     time * (i % 2 == 0 ? 0.3F : -0.22F), 0.35F);
         }
 
@@ -234,7 +234,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             }
             float r = radius(spin, time, fullRadius) * 1.3F * thin;
             float ringAlpha = 0.85F * alpha * (1.0F - (float) (spin / Math.max(length, 1.0)));
-            drawBand(glow, matrix, direction.scale(spin), direction, u, v, r, 0.12F + r * 0.03F, RED, ringAlpha);
+            drawBand(glow, matrix, direction.scale(spin), direction, firstAxis, secondAxis, r, 0.12F + r * 0.03F, RED, ringAlpha);
         }
 
         // beam front
@@ -268,7 +268,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
 
         // threads
         for (int k = 0; k < 3; k++) {
-            drawThread(glow, matrix, direction, u, v, length, fullRadius, thin, time, k * Mth.TWO_PI / 3 + 0.5F, RED, 0.8F * alpha);
+            drawThread(glow, matrix, direction, firstAxis, secondAxis, length, fullRadius, thin, time, k * Mth.TWO_PI / 3 + 0.5F, RED, 0.8F * alpha);
         }
     }
 
@@ -316,7 +316,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         vertex(vertexBuffer, matrix, endPoint, color, endAlpha);
     }
 
-    private static void drawTube(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 direction, Vec3 u, Vec3 v, double length, float full,
+    private static void drawTube(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 direction, Vec3 firstAxis, Vec3 secondAxis, double length, float full,
                              float thin, float time, float scale, int[] color, float alpha) {
         if (alpha <= 0.01F) {
             return;
@@ -330,8 +330,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             for (int j = 0; j < AROUND; j++) {
                 float startAngle = j * Mth.TWO_PI / AROUND;
                 float endAngle = (j + 1) * Mth.TWO_PI / AROUND;
-                Vec3 startOffset = u.scale(Mth.cos(startAngle)).add(v.scale(Mth.sin(startAngle)));
-                Vec3 endOffset = u.scale(Mth.cos(endAngle)).add(v.scale(Mth.sin(endAngle)));
+                Vec3 startOffset = firstAxis.scale(Mth.cos(startAngle)).add(secondAxis.scale(Mth.sin(startAngle)));
+                Vec3 endOffset = firstAxis.scale(Mth.cos(endAngle)).add(secondAxis.scale(Mth.sin(endAngle)));
                 vertex(vertexBuffer, matrix, direction.scale(startDistance).add(startOffset.scale(startRadius)), color, alpha);
                 vertex(vertexBuffer, matrix, direction.scale(startDistance).add(endOffset.scale(startRadius)), color, alpha);
                 vertex(vertexBuffer, matrix, direction.scale(endDistance).add(endOffset.scale(endRadius)), color, alpha);
@@ -340,7 +340,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         }
     }
 
-    private static void drawSwirl(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 direction, Vec3 u, Vec3 v, Vec3 camera, double length,
+    private static void drawSwirl(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 direction, Vec3 firstAxis, Vec3 secondAxis, Vec3 camera, double length,
                               float full, float thin, float time, float offset, int[] color, float alpha) {
         int segments = Math.max(1, (int) Math.ceil(length / 0.75));
         float width = 0.34F;
@@ -351,14 +351,14 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             float endAngle = (float) endDistance * 0.42F + offset + time * 0.5F;
             float startRadius = radius(startDistance, time, full) * 1.04F * thin;
             float endRadius = radius(endDistance, time, full) * 1.04F * thin;
-            Vec3 startOffset = u.scale(Mth.cos(startAngle)).add(v.scale(Mth.sin(startAngle)));
-            Vec3 endOffset = u.scale(Mth.cos(endAngle)).add(v.scale(Mth.sin(endAngle)));
+            Vec3 startOffset = firstAxis.scale(Mth.cos(startAngle)).add(secondAxis.scale(Mth.sin(startAngle)));
+            Vec3 endOffset = firstAxis.scale(Mth.cos(endAngle)).add(secondAxis.scale(Mth.sin(endAngle)));
             Vec3 mid = direction.scale(startDistance).add(startOffset.scale(startRadius));
             if (startOffset.dot(camera.subtract(mid)) <= 0) {
                 continue;
             }
-            Vec3 startOuter = u.scale(Mth.cos(startAngle + width)).add(v.scale(Mth.sin(startAngle + width)));
-            Vec3 endOuter = u.scale(Mth.cos(endAngle + width)).add(v.scale(Mth.sin(endAngle + width)));
+            Vec3 startOuter = firstAxis.scale(Mth.cos(startAngle + width)).add(secondAxis.scale(Mth.sin(startAngle + width)));
+            Vec3 endOuter = firstAxis.scale(Mth.cos(endAngle + width)).add(secondAxis.scale(Mth.sin(endAngle + width)));
             float fade = tipFade(startDistance, length);
             vertex(vertexBuffer, matrix, direction.scale(startDistance).add(startOffset.scale(startRadius)), color, alpha * fade);
             vertex(vertexBuffer, matrix, direction.scale(startDistance).add(startOuter.scale(startRadius)), color, alpha * fade);
@@ -367,7 +367,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         }
     }
 
-    private static void drawThread(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 direction, Vec3 u, Vec3 v, double length, float full,
+    private static void drawThread(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 direction, Vec3 firstAxis, Vec3 secondAxis, double length, float full,
                                float thin, float time, float offset, int[] color, float alpha) {
         int segments = Math.max(1, (int) Math.ceil(length / 0.75));
         for (int i = 0; i < segments; i++) {
@@ -377,8 +377,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             float endAngle = (float) endDistance * -0.3F + offset - time * 0.35F;
             float startRadius = radius(startDistance, time, full) * 1.12F * thin;
             float endRadius = radius(endDistance, time, full) * 1.12F * thin;
-            Vec3 startOffset = u.scale(Mth.cos(startAngle)).add(v.scale(Mth.sin(startAngle)));
-            Vec3 endOffset = u.scale(Mth.cos(endAngle)).add(v.scale(Mth.sin(endAngle)));
+            Vec3 startOffset = firstAxis.scale(Mth.cos(startAngle)).add(secondAxis.scale(Mth.sin(startAngle)));
+            Vec3 endOffset = firstAxis.scale(Mth.cos(endAngle)).add(secondAxis.scale(Mth.sin(endAngle)));
             Vec3 startPoint = direction.scale(startDistance).add(startOffset.scale(startRadius));
             Vec3 endPoint = direction.scale(endDistance).add(endOffset.scale(endRadius));
             Vec3 sideOffset = startOffset.scale(0.08 + startRadius * 0.02);
@@ -391,7 +391,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
     }
 
     // short open cylinder round an axis
-    private static void drawBand(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 center, Vec3 axis, Vec3 u, Vec3 v, float radius,
+    private static void drawBand(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 center, Vec3 axis, Vec3 firstAxis, Vec3 secondAxis, float radius,
                              float halfWidth, int[] color, float alpha) {
         if (alpha <= 0.01F) {
             return;
@@ -401,8 +401,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         for (int j = 0; j < AROUND * 2; j++) {
             float startAngle = j * Mth.TWO_PI / (AROUND * 2);
             float endAngle = (j + 1) * Mth.TWO_PI / (AROUND * 2);
-            Vec3 startOffset = u.scale(Mth.cos(startAngle) * radius).add(v.scale(Mth.sin(startAngle) * radius));
-            Vec3 endOffset = u.scale(Mth.cos(endAngle) * radius).add(v.scale(Mth.sin(endAngle) * radius));
+            Vec3 startOffset = firstAxis.scale(Mth.cos(startAngle) * radius).add(secondAxis.scale(Mth.sin(startAngle) * radius));
+            Vec3 endOffset = firstAxis.scale(Mth.cos(endAngle) * radius).add(secondAxis.scale(Mth.sin(endAngle) * radius));
             vertex(vertexBuffer, matrix, center.add(startOffset).add(back), color, alpha);
             vertex(vertexBuffer, matrix, center.add(endOffset).add(back), color, alpha);
             vertex(vertexBuffer, matrix, center.add(endOffset).add(front), color, alpha);
@@ -410,7 +410,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         }
     }
 
-    private static void drawSpinningBand(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 center, Vec3 axis, Vec3 u, Vec3 v,
+    private static void drawSpinningBand(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 center, Vec3 axis, Vec3 firstAxis, Vec3 secondAxis,
                                      float radius, float halfWidth, int[] color, float alpha, float spin, float floor) {
         if (alpha <= 0.01F || radius <= 0.01F) {
             return;
@@ -426,8 +426,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             if (endBrightness < startBrightness) {
                 endBrightness = 1.0F;
             }
-            Vec3 startOffset = u.scale(Mth.cos(startAngle) * radius).add(v.scale(Mth.sin(startAngle) * radius));
-            Vec3 endOffset = u.scale(Mth.cos(endAngle) * radius).add(v.scale(Mth.sin(endAngle) * radius));
+            Vec3 startOffset = firstAxis.scale(Mth.cos(startAngle) * radius).add(secondAxis.scale(Mth.sin(startAngle) * radius));
+            Vec3 endOffset = firstAxis.scale(Mth.cos(endAngle) * radius).add(secondAxis.scale(Mth.sin(endAngle) * radius));
             vertex(vertexBuffer, matrix, center.add(startOffset).add(back), color, alpha * startBrightness);
             vertex(vertexBuffer, matrix, center.add(endOffset).add(back), color, alpha * endBrightness);
             vertex(vertexBuffer, matrix, center.add(endOffset).add(front), color, alpha * endBrightness);
@@ -436,7 +436,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
     }
 
     // flat dashed ring lying in the u/v plane
-    private static void drawFlatRing(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 center, Vec3 u, Vec3 v, float radius,
+    private static void drawFlatRing(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 center, Vec3 firstAxis, Vec3 secondAxis, float radius,
                                  float width, int[] color, float alpha, float spin, int dashes) {
         if (alpha <= 0.01F || radius <= 0.01F) {
             return;
@@ -448,8 +448,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
             }
             float startAngle = j * Mth.TWO_PI / steps + spin;
             float endAngle = (j + 1) * Mth.TWO_PI / steps + spin;
-            Vec3 startDirection = u.scale(Mth.cos(startAngle)).add(v.scale(Mth.sin(startAngle)));
-            Vec3 endDirection = u.scale(Mth.cos(endAngle)).add(v.scale(Mth.sin(endAngle)));
+            Vec3 startDirection = firstAxis.scale(Mth.cos(startAngle)).add(secondAxis.scale(Mth.sin(startAngle)));
+            Vec3 endDirection = firstAxis.scale(Mth.cos(endAngle)).add(secondAxis.scale(Mth.sin(endAngle)));
             vertex(vertexBuffer, matrix, center.add(startDirection.scale(radius - width)), color, alpha);
             vertex(vertexBuffer, matrix, center.add(endDirection.scale(radius - width)), color, alpha);
             vertex(vertexBuffer, matrix, center.add(endDirection.scale(radius + width)), color, alpha);
@@ -458,7 +458,7 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
     }
 
     // filled circle
-    private static void drawDisc(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 center, Vec3 u, Vec3 v, float radius,
+    private static void drawDisc(VfxBuffer vertexBuffer, Matrix4f matrix, Vec3 center, Vec3 firstAxis, Vec3 secondAxis, float radius,
                              int[] color, float alpha, float edgeAlpha) {
         if (alpha <= 0.01F || radius <= 0.01F) {
             return;
@@ -467,8 +467,8 @@ public class EnumaElishVisualEntityRenderer extends EntityRenderer<EnumaElishVis
         for (int j = 0; j < steps; j++) {
             float startAngle = j * Mth.TWO_PI / steps;
             float endAngle = (j + 1) * Mth.TWO_PI / steps;
-            Vec3 startPoint = center.add(u.scale(Mth.cos(startAngle) * radius)).add(v.scale(Mth.sin(startAngle) * radius));
-            Vec3 endPoint = center.add(u.scale(Mth.cos(endAngle) * radius)).add(v.scale(Mth.sin(endAngle) * radius));
+            Vec3 startPoint = center.add(firstAxis.scale(Mth.cos(startAngle) * radius)).add(secondAxis.scale(Mth.sin(startAngle) * radius));
+            Vec3 endPoint = center.add(firstAxis.scale(Mth.cos(endAngle) * radius)).add(secondAxis.scale(Mth.sin(endAngle) * radius));
             vertex(vertexBuffer, matrix, center, color, alpha);
             vertex(vertexBuffer, matrix, center, color, alpha);
             vertex(vertexBuffer, matrix, endPoint, color, edgeAlpha);

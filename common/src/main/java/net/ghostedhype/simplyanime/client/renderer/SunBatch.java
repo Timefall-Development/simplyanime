@@ -193,43 +193,43 @@ public class SunBatch {
     }
 
     // blended, then a bit additive
-    private void drawFire(ResourceLocation texture, Vec3 center, Vec3 u, Vec3 v, float halfU, float halfV, int[] color, float alpha,
+    private void drawFire(ResourceLocation texture, Vec3 center, Vec3 firstAxis, Vec3 secondAxis, float halfU, float halfV, int[] color, float alpha,
                       float minU, float minV, float maxU, float maxV) {
-        this.quad(this.blended, texture, center, u, v, halfU, halfV, color, alpha, minU, minV, maxU, maxV);
-        this.quad(this.additive, texture, center, u, v, halfU, halfV, color, alpha * LIT, minU, minV, maxU, maxV);
+        this.quad(this.blended, texture, center, firstAxis, secondAxis, halfU, halfV, color, alpha, minU, minV, maxU, maxV);
+        this.quad(this.additive, texture, center, firstAxis, secondAxis, halfU, halfV, color, alpha * LIT, minU, minV, maxU, maxV);
     }
 
     void drawSmoke(Vec3 center, float radius, float spin, int[] color, float alpha) {
-        Vec3 u = this.right.scale(Mth.cos(spin)).add(this.cameraUp.scale(Mth.sin(spin)));
-        Vec3 v = this.right.scale(-Mth.sin(spin)).add(this.cameraUp.scale(Mth.cos(spin)));
-        this.quad(this.blended, SunRenderTypes.SMOKE, center, u, v, radius, radius, color, alpha, 0, 0, 1, 1);
+        Vec3 firstAxis = this.right.scale(Mth.cos(spin)).add(this.cameraUp.scale(Mth.sin(spin)));
+        Vec3 secondAxis = this.right.scale(-Mth.sin(spin)).add(this.cameraUp.scale(Mth.cos(spin)));
+        this.quad(this.blended, SunRenderTypes.SMOKE, center, firstAxis, secondAxis, radius, radius, color, alpha, 0, 0, 1, 1);
     }
 
-    void drawRay(Vec3 center, float a, float from, float to, float halfWidth, int[] color, float alpha) {
-        Vec3 direction = this.right.scale(Mth.cos(a)).add(this.cameraUp.scale(Mth.sin(a)));
-        Vec3 side = this.right.scale(-Mth.sin(a)).add(this.cameraUp.scale(Mth.cos(a)));
+    void drawRay(Vec3 center, float angle, float from, float to, float halfWidth, int[] color, float alpha) {
+        Vec3 direction = this.right.scale(Mth.cos(angle)).add(this.cameraUp.scale(Mth.sin(angle)));
+        Vec3 side = this.right.scale(-Mth.sin(angle)).add(this.cameraUp.scale(Mth.cos(angle)));
         Vec3 mid = center.add(direction.scale((from + to) * 0.5F));
         this.quad(this.additive, SunRenderTypes.RAY, mid, side, direction, halfWidth, (to - from) * 0.5F, color, alpha, 0, 0, 1, 1);
     }
 
-    void drawStreak(ResourceLocation texture, Vec3 a, Vec3 b, Vec3 side, float halfA, float halfB, int[] color, float alpha, float scroll) {
+    void drawStreak(ResourceLocation texture, Vec3 startPoint, Vec3 endPoint, Vec3 side, float halfA, float halfB, int[] color, float alpha, float scroll) {
         List<Corner> list = this.blended.computeIfAbsent(texture, k -> new ArrayList<>());
         float minU = 0.0F;
         float maxU = texture == SunRenderTypes.FLAMES ? 0.25F : 1.0F;
-        list.add(corner(a.add(side.scale(-halfA)), color, alpha, minU, 1 + scroll));
-        list.add(corner(a.add(side.scale(halfA)), color, alpha, maxU, 1 + scroll));
-        list.add(corner(b.add(side.scale(halfB)), color, alpha * 0.2F, maxU, scroll));
-        list.add(corner(b.add(side.scale(-halfB)), color, alpha * 0.2F, minU, scroll));
+        list.add(corner(startPoint.add(side.scale(-halfA)), color, alpha, minU, 1 + scroll));
+        list.add(corner(startPoint.add(side.scale(halfA)), color, alpha, maxU, 1 + scroll));
+        list.add(corner(endPoint.add(side.scale(halfB)), color, alpha * 0.2F, maxU, scroll));
+        list.add(corner(endPoint.add(side.scale(-halfB)), color, alpha * 0.2F, minU, scroll));
     }
 
-    private void quad(Map<ResourceLocation, List<Corner>> target, ResourceLocation texture, Vec3 center, Vec3 u, Vec3 v,
+    private void quad(Map<ResourceLocation, List<Corner>> target, ResourceLocation texture, Vec3 center, Vec3 firstAxis, Vec3 secondAxis,
                       float halfU, float halfV, int[] color, float alpha, float minU, float minV, float maxU, float maxV) {
         if (alpha <= 0.005F || halfU <= 0.001F || halfV <= 0.001F) {
             return;
         }
         List<Corner> list = target.computeIfAbsent(texture, k -> new ArrayList<>());
-        Vec3 offsetU = u.scale(halfU);
-        Vec3 offsetV = v.scale(halfV);
+        Vec3 offsetU = firstAxis.scale(halfU);
+        Vec3 offsetV = secondAxis.scale(halfV);
         // v0 is the top edge (along +v), v1 the bottom edge
         list.add(corner(center.subtract(offsetU).subtract(offsetV), color, alpha, minU, maxV));
         list.add(corner(center.add(offsetU).subtract(offsetV), color, alpha, maxU, maxV));

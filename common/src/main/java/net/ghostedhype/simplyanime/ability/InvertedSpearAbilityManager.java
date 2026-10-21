@@ -96,7 +96,7 @@ public class InvertedSpearAbilityManager {
                 context.hand() == null ? InteractionHand.MAIN_HAND : context.hand(), world.getGameTime(),
                 chain.getUUID(), lockOn == null ? null : lockOn.getUUID(),
                 lockTarget == null ? null : lockTarget.getUUID());
-        FIELDS.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUUID(), field);
+        FIELDS.computeIfAbsent(world, serverLevel -> new HashMap<>()).put(actor.getUUID(), field);
         return true;
     }
 
@@ -253,7 +253,7 @@ public class InvertedSpearAbilityManager {
         TwinStrike strike = new TwinStrike(actor.getUUID(), ownerId, context.stack().copy(),
                 context.hand() == null ? InteractionHand.MAIN_HAND : context.hand(), world.getGameTime(), stance.getUUID(),
                 target == null ? null : target.getUUID());
-        STRIKES.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUUID(), strike);
+        STRIKES.computeIfAbsent(world, serverLevel -> new HashMap<>()).put(actor.getUUID(), strike);
         return true;
     }
 
@@ -527,9 +527,9 @@ public class InvertedSpearAbilityManager {
         return (float) (Mth.atan2(direction.z, direction.x) * Mth.RAD_TO_DEG) - 90.0F;
     }
 
-    private static Vec3 bezier(Vec3 a, Vec3 control, Vec3 b, float progress) {
-        float u = 1.0F - progress;
-        return a.scale(u * u).add(control.scale(2 * u * progress)).add(b.scale(progress * progress));
+    private static Vec3 bezier(Vec3 bezierStart, Vec3 control, Vec3 bezierEnd, float tickProgress) {
+        float progressRemaining = 1.0F - tickProgress;
+        return bezierStart.scale(progressRemaining * progressRemaining).add(control.scale(2 * progressRemaining * tickProgress)).add(bezierEnd.scale(tickProgress * tickProgress));
     }
 
     private static void playSound(ServerLevel world, Entity source, SoundEvent sound, float volume, float pitch) {

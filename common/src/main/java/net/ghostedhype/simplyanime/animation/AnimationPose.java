@@ -81,15 +81,15 @@ public class AnimationPose {
         this.leftSword = sword;
     }
 
-    private void swap(int a, int b) {
-        this.scratchPosition.set(this.position[a]);
-        this.position[a].set(this.position[b]);
-        this.position[b].set(this.scratchPosition);
-        this.scratchRotation.set(this.rotation[a]);
-        this.rotation[a].set(this.rotation[b]);
-        this.rotation[b].set(this.scratchRotation);
-        float weight = this.weight[a];
-        this.weight[a] = this.weight[b];
-        this.weight[b] = weight;
+    private void swap(int first, int second) {
+        this.scratchPosition.set(this.position[first]);
+        this.position[first].set(this.position[second]);
+        this.position[second].set(this.scratchPosition);
+        this.scratchRotation.set(this.rotation[first]);
+        this.rotation[first].set(this.rotation[second]);
+        this.rotation[second].set(this.scratchRotation);
+        float weight = this.weight[first];
+        this.weight[first] = this.weight[second];
+        this.weight[second] = weight;
     }
 }

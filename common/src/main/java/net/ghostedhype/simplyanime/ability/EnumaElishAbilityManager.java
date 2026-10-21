@@ -88,7 +88,7 @@ public class EnumaElishAbilityManager {
         EnumaElishCast cast = new EnumaElishCast(actor.getUUID(), ownerId, context.stack().copy(),
                 context.hand() == null ? InteractionHand.MAIN_HAND : context.hand(), world.getGameTime(), visual.getUUID(),
                 context.target() == null ? null : context.target().getUUID());
-        CASTS.computeIfAbsent(world, ignored -> new HashMap<>()).put(actor.getUUID(), cast);
+        CASTS.computeIfAbsent(world, serverLevel -> new HashMap<>()).put(actor.getUUID(), cast);
         return true;
     }
 
@@ -271,21 +271,21 @@ public class EnumaElishAbilityManager {
                 continue;
             }
 
-            Vec3 position = AbilityHelper.strike(world, actor, cast.ownerId, cast.stack, entity, root, damage);
-            if (position != null && blast) {
+            Vec3 hitPoint = AbilityHelper.strike(world, actor, cast.ownerId, cast.stack, entity, root, damage);
+            if (hitPoint != null && blast) {
                 if (!(root instanceof EnderDragon)) {
                     Vec3 push = cast.direction.scale(settings.beamKnockback);
                     root.push(push.x, push.y * 0.5 + 0.25 * settings.beamKnockback, push.z);
                     root.hurtMarked = true;
                 }
-                burst(world, position);
+                burst(world, hitPoint);
             }
         }
     }
 
-    private static void burst(ServerLevel world, Vec3 position) {
-        world.sendParticles(ParticlesRegistry.RUPTURE_EMBER.get(), position.x, position.y, position.z, 16, 0.4, 0.4, 0.4, 0.35);
-        world.sendParticles(ParticleTypes.FLASH, position.x, position.y, position.z, 1, 0, 0, 0, 0);
+    private static void burst(ServerLevel world, Vec3 burstCenter) {
+        world.sendParticles(ParticlesRegistry.RUPTURE_EMBER.get(), burstCenter.x, burstCenter.y, burstCenter.z, 16, 0.4, 0.4, 0.4, 0.35);
+        world.sendParticles(ParticleTypes.FLASH, burstCenter.x, burstCenter.y, burstCenter.z, 1, 0, 0, 0, 0);
     }
 
     private static boolean holdingSword(LivingEntity actor) {

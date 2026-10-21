@@ -130,10 +130,10 @@ public class EnumaElishVisualEntity extends PhasedEffectEntity {
                     (random.nextDouble() - 0.5) * 0.15);
         }
         if (this.tickCount % 3 == 0) {
-            double a = random.nextDouble() * Mth.TWO_PI;
+            double angle = random.nextDouble() * Mth.TWO_PI;
             double r = 1.2 + random.nextDouble() * 1.6;
-            world.addParticle(ParticleTypes.LARGE_SMOKE, owner.getX() + Math.cos(a) * r, owner.getY() + 0.1,
-                    owner.getZ() + Math.sin(a) * r, 0, 0.03 + progress * 0.05, 0);
+            world.addParticle(ParticleTypes.LARGE_SMOKE, owner.getX() + Math.cos(angle) * r, owner.getY() + 0.1,
+                    owner.getZ() + Math.sin(angle) * r, 0, 0.03 + progress * 0.05, 0);
         }
     }
 
@@ -145,13 +145,13 @@ public class EnumaElishVisualEntity extends PhasedEffectEntity {
         float radius = this.getRadius();
         for (int i = 0; i < 24; i++) {
             double along = random.nextDouble() * length;
-            double a = random.nextDouble() * Mth.TWO_PI;
+            double angle = random.nextDouble() * Mth.TWO_PI;
             Vec3 side = perpendicular(direction);
             Vec3 upward = direction.cross(side);
-            Vec3 out = side.scale(Math.cos(a)).add(upward.scale(Math.sin(a)));
+            Vec3 out = side.scale(Math.cos(angle)).add(upward.scale(Math.sin(angle)));
             Vec3 point = this.position().add(direction.scale(along)).add(out.scale(profile(along, radius) * (0.9 + random.nextDouble() * 0.5)));
-            Vec3 v = out.scale(0.12 + random.nextDouble() * 0.2).add(direction.scale(0.4));
-            world.addParticle(ParticlesRegistry.RUPTURE_EMBER.get(), point.x, point.y, point.z, v.x, v.y, v.z);
+            Vec3 velocity = out.scale(0.12 + random.nextDouble() * 0.2).add(direction.scale(0.4));
+            world.addParticle(ParticlesRegistry.RUPTURE_EMBER.get(), point.x, point.y, point.z, velocity.x, velocity.y, velocity.z);
         }
         if (this.isHitTerrain()) {
             Vec3 end = this.position().add(direction.scale(length));

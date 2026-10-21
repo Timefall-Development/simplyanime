@@ -21,9 +21,9 @@ import java.util.UUID;
 // bits every ability needs
 public class AbilityHelper {
 
-    public static void playSound(ServerLevel world, Vec3 position, SoundEvent sound, float volume, float pitch) {
+    public static void playSound(ServerLevel world, Vec3 soundPoint, SoundEvent sound, float volume, float pitch) {
         if (volume > 0) {
-            world.playSound(null, position.x, position.y, position.z, sound, SoundSource.PLAYERS, volume, pitch);
+            world.playSound(null, soundPoint.x, soundPoint.y, soundPoint.z, sound, SoundSource.PLAYERS, volume, pitch);
         }
     }
 

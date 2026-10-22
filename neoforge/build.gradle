@@ -53,12 +53,12 @@ dependencies {
 
     // Ensure plain libraries are available in NeoForge 1.21.1 development runs.
     // Production distributions obtain these through Fzzy Config and Kotlin for Forge.
-    additionalRuntimeClasspath 'blue.endless:jankson:1.2.3'
-    additionalRuntimeClasspath 'net.peanuuutz.tomlkt:tomlkt-jvm:0.3.7'
-    additionalRuntimeClasspath "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.kotlin_version}"
-    additionalRuntimeClasspath "org.jetbrains.kotlin:kotlin-reflect:${rootProject.kotlin_version}"
-    additionalRuntimeClasspath 'org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2'
-    additionalRuntimeClasspath 'org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.9.0'
+    //additionalRuntimeClasspath 'blue.endless:jankson:1.2.3'
+    //additionalRuntimeClasspath 'net.peanuuutz.tomlkt:tomlkt-jvm:0.3.7'
+    //additionalRuntimeClasspath "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.kotlin_version}"
+    //additionalRuntimeClasspath "org.jetbrains.kotlin:kotlin-reflect:${rootProject.kotlin_version}"
+    //additionalRuntimeClasspath 'org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2'
+    //additionalRuntimeClasspath 'org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.9.0'
 }
 
 // Register mixin JSON files in META-INF/neoforge.mods.toml using [[mixins]].

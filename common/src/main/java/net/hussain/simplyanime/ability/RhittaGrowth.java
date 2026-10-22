@@ -34,8 +34,8 @@ public class RhittaGrowth {
             return amount;
         }
         float power = SunPower.sunPower(attacker.level(), attacker);
-        RhittaConfig.AxeSettings cfg = RhittaConfig.get().axe;
-        float seconds = cfg.burnSeconds + cfg.burnSunScaling * Math.max(0.0F, power - 1.0F);
+        RhittaConfig.AxeSettings config = RhittaConfig.get().axe;
+        float seconds = config.burnSeconds + config.burnSunScaling * Math.max(0.0F, power - 1.0F);
         if (seconds > 0) {
             target.igniteForSeconds(seconds);
         }
@@ -43,39 +43,39 @@ public class RhittaGrowth {
     }
 
     public static float targetScale(Player player) {
-        RhittaConfig.GrowthSettings cfg = RhittaConfig.get().growth;
-        if (!cfg.enabled || !holding(player)) {
+        RhittaConfig.GrowthSettings config = RhittaConfig.get().growth;
+        if (!config.enabled || !holding(player)) {
             return 1.0F;
         }
         float sun = SunPower.fraction(SunPower.sunPower(player.level(), player));
-        return Mth.lerp(sun, 1.0F, Math.max(1.0F, cfg.maxScale));
+        return Mth.lerp(sun, 1.0F, Math.max(1.0F, config.maxScale));
     }
 
     public static float renderScale(Player player, float partialTick) {
-        float[] s = CLIENT.get(player);
-        return s == null ? 1.0F : Mth.lerp(partialTick, s[0], s[1]);
+        float[] scale = CLIENT.get(player);
+        return scale == null ? 1.0F : Mth.lerp(partialTick, scale[0], scale[1]);
     }
 
     public static void tick(Player player) {
         Map<Player, float[]> map = player.level().isClientSide() ? CLIENT : SERVER;
-        float[] s = map.computeIfAbsent(player, p -> new float[]{1.0F, 1.0F, 1.0F});
-        s[0] = s[1];
+        float[] scale = map.computeIfAbsent(player, p -> new float[]{1.0F, 1.0F, 1.0F});
+        scale[0] = scale[1];
         float target = targetScale(player);
-        float next = s[1] + (target - s[1]) * 0.08F;
+        float next = scale[1] + (target - scale[1]) * 0.08F;
         if (Math.abs(target - next) < 0.002F) {
             next = target;
         }
 
         boolean hitbox = RhittaConfig.get().growth.scaleHitbox;
         // never grow into a ceiling or a wall
-        if (hitbox && next > s[1] && !roomFor(player, next)) {
-            next = s[1];
+        if (hitbox && next > scale[1] && !roomFor(player, next)) {
+            next = scale[1];
         }
-        s[1] = next;
+        scale[1] = next;
 
         float built = hitbox ? next : 1.0F;
-        if (Math.abs(built - s[2]) > 0.01F || (built == target && built != s[2])) {
-            s[2] = built;
+        if (Math.abs(built - scale[2]) > 0.01F || (built == target && built != scale[2])) {
+            scale[2] = built;
             player.refreshDimensions();
             if (!player.level().isClientSide()) {
                 AbilityHelper.setReach(player, built);
@@ -92,7 +92,7 @@ public class RhittaGrowth {
         if (!(entity instanceof Player player) || player.level() == null) {
             return 1.0F;
         }
-        float[] s = (player.level().isClientSide() ? CLIENT : SERVER).get(player);
-        return s == null ? 1.0F : s[2];
+        float[] scale = (player.level().isClientSide() ? CLIENT : SERVER).get(player);
+        return scale == null ? 1.0F : scale[2];
     }
 }

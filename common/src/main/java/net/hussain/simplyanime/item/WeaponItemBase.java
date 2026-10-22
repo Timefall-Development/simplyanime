@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TooltipFlag;
@@ -29,18 +30,17 @@ public abstract class WeaponItemBase extends UniqueSwordItem implements UniqueWe
         return useFromDefaultInput(level, user, hand);
     }
 
-    //TODO Look into what changes need to be made with respect to tooltips
     @Override
-    protected void appendUniqueWeaponTooltip(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
+    protected void appendUniqueWeaponTooltip(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag flag) {
         this.appendAbilityTooltip(stack, tooltip);
-        appendSharedUniqueWeaponTooltip(stack, level, tooltip, flag);
+        appendSharedUniqueWeaponTooltip(stack, tooltipContext, tooltip, flag);
         SimplySwordsClientAPI.appendSpellScaleTooltip(tooltip, "arcane");
     }
 
     @Override
-    protected void generateDynamicTooltip(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
+    protected void generateDynamicTooltip(ItemStack stack, Item.TooltipContext tooltipContext, List<Component> tooltip, TooltipFlag flag) {
         List<Component> sockets = new ArrayList<>();
-        SimplySwordsAPI.appendTooltipGemSocketLogic(stack, level, sockets, flag);
+        SimplySwordsAPI.appendTooltipGemSocketLogic(stack, tooltipContext, sockets, flag);
         while (!sockets.isEmpty() && sockets.get(0).getString().isEmpty()) {
             sockets.remove(0);
         }

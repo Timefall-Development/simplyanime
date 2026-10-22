@@ -258,12 +258,12 @@ public class BladeSkillManager {
         float cos = Mth.cos(angle);
         float sin = Mth.sin(angle);
         for (Entity entity : world.getEntities(actor, new AABB(cast.center, cast.center).inflate(half * 1.5 + 2.0, 4.0, half * 1.5 + 2.0))) {
-            Vec3 at = entity.getBoundingBox().getCenter().subtract(cast.center);
-            double x = at.x * cos + at.z * sin;
-            double z = -at.x * sin + at.z * cos;
+            Vec3 entityPosition = entity.getBoundingBox().getCenter().subtract(cast.center);
+            double x = entityPosition.x * cos + entityPosition.z * sin;
+            double z = -entityPosition.x * sin + entityPosition.z * cos;
             double reach = Math.max(Math.abs(x), Math.abs(z)) - entity.getBbWidth() * 0.5;
-            if (reach <= half + 0.6 && Math.abs(at.y - 1.0) <= 3.0) {
-                Vec3 out = new Vec3(at.x, 0, at.z);
+            if (reach <= half + 0.6 && Math.abs(entityPosition.y - 1.0) <= 3.0) {
+                Vec3 out = new Vec3(entityPosition.x, 0, entityPosition.z);
                 Vec3 push = out.lengthSqr() < 1.0E-4 ? Vec3.ZERO : out.normalize().scale(settings.knockback);
                 land(world, cast, actor, entity, cast.struck, damage, push.add(0, 0.3 * settings.knockback, 0),
                         ParticlesRegistry.FROST_SHARD.get());
@@ -333,10 +333,10 @@ public class BladeSkillManager {
         while (iterator.hasNext()) {
             SlashWave wave = iterator.next();
             if (wave.damage > 0) {
-                Vec3 at = wave.centerAt(wave.age);
+                Vec3 wavePosition = wave.centerAt(wave.age);
                 double reach = wave.halfAt(wave.age) + wave.thickness + wave.speed + 2.0;
                 Vec3 push = wave.direction.scale(wave.knockback).add(0, 0.2 * wave.knockback, 0);
-                for (Entity entity : world.getEntities(actor, new AABB(at, at).inflate(reach))) {
+                for (Entity entity : world.getEntities(actor, new AABB(wavePosition, wavePosition).inflate(reach))) {
                     AABB box = entity.getBoundingBox();
                     if (wave.touches(box, wave.age) || wave.age > 0 && wave.touches(box, wave.age - 0.5F)) {
                         land(world, cast, actor, entity, wave.struck, wave.damage, push, ParticlesRegistry.FROST_SHARD.get());
@@ -356,16 +356,16 @@ public class BladeSkillManager {
         if (root == null || root == actor || !struck.add(root.getUUID())) {
             return;
         }
-        Vec3 at = AbilityHelper.strike(world, actor, cast.ownerId, cast.stack, entity, root, damage);
-        if (at == null) {
+        Vec3 strikePosition = AbilityHelper.strike(world, actor, cast.ownerId, cast.stack, entity, root, damage);
+        if (strikePosition == null) {
             return;
         }
         if (root instanceof LivingEntity) {
             root.push(push.x, push.y, push.z);
             root.hurtMarked = true;
         }
-        world.sendParticles(spark, at.x, at.y, at.z, 10, 0.3, 0.3, 0.3, 0.3);
-        sound(world, at, SoundRegistry.BLADE_HIT.get(), 1.0F, 0.9F + world.getRandom().nextFloat() * 0.3F);
+        world.sendParticles(spark, strikePosition.x, strikePosition.y, strikePosition.z, 10, 0.3, 0.3, 0.3, 0.3);
+        sound(world, strikePosition, SoundRegistry.BLADE_HIT.get(), 1.0F, 0.9F + world.getRandom().nextFloat() * 0.3F);
     }
 
     private static Vec3 aim(ServerLevel world, BladeSkillCast cast, LivingEntity actor) {
@@ -386,8 +386,8 @@ public class BladeSkillManager {
         actor.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, level, false, false, false));
     }
 
-    private static void sound(ServerLevel world, Vec3 at, SoundEvent sound, float volume, float pitch) {
-        AbilityHelper.playSound(world, at, sound, volume, pitch);
+    private static void sound(ServerLevel world, Vec3 position, SoundEvent sound, float volume, float pitch) {
+        AbilityHelper.playSound(world, position, sound, volume, pitch);
     }
 
     private static void abort(ServerLevel world, BladeSkillCast cast, @Nullable LivingEntity actor) {

@@ -39,17 +39,17 @@ public class RhittaCinematics {
             }
             int phase = sun.getPhase();
             float ticks = sun.getPhaseTicks(0.0F);
-            float[] seen = SEEN.computeIfAbsent(sun, s -> new float[]{-1, -1});
+            float[] seen = SEEN.computeIfAbsent(sun, cruelSunEntity -> new float[]{-1, -1});
             LivingEntity owner = sun.getOwner();
 
             if (phase == CruelSunEntity.PHASE_CHARGE && owner != null) {
                 float orb = sun.getOrbRadius(0.0F);
-                Vec3 at = CruelSunEntity.chargeCenter(owner, 1.0F, orb);
-                float near = (float) Mth.clamp(1.0 - at.distanceTo(eye) / (48.0 + orb * 4.0), 0.0, 1.0);
+                Vec3 positionVec = CruelSunEntity.chargeCenter(owner, 1.0F, orb);
+                float near = (float) Mth.clamp(1.0 - positionVec.distanceTo(eye) / (48.0 + orb * 4.0), 0.0, 1.0);
                 if (owner == client.player) {
                     // far enough back to fit the whole sun
                     float boost = 20.0F * Math.min(1.0F, orb / 6.0F);
-                    double top = at.y - owner.getY() + orb * CruelSunEntity.HEAT_EDGE;
+                    double top = positionVec.y - owner.getY() + orb * CruelSunEntity.HEAT_EDGE;
                     double wide = orb * CruelSunEntity.HEAT_EDGE;
                     double half = Math.toRadians((client.options.fov().get() + boost) * 0.5);
                     double needed = Math.max(top, wide) / Math.tan(half) * 1.2;
@@ -96,18 +96,18 @@ public class RhittaCinematics {
     }
 
     public static double cameraPullBack() {
-        RhittaClientConfig cfg = RhittaClientConfig.get();
-        if (!cfg.cameraZoom || !thirdPerson()) {
+        RhittaClientConfig config = RhittaClientConfig.get();
+        if (!config.cameraZoom || !thirdPerson()) {
             return 0.0;
         }
         //TODO Make method for getting tick
-        return get(PULL, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) * cfg.cameraZoomStrength;
+        return get(PULL, Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) * config.cameraZoomStrength;
     }
 
     public static double fov(double fov, float partialTick, boolean configured) {
-        RhittaClientConfig cfg = RhittaClientConfig.get();
-        if (cfg.cameraZoom && thirdPerson() && configured) {
-            return Math.min(150.0, fov + get(FOV, partialTick) * cfg.cameraZoomStrength);
+        RhittaClientConfig config = RhittaClientConfig.get();
+        if (config.cameraZoom && thirdPerson() && configured) {
+            return Math.min(150.0, fov + get(FOV, partialTick) * config.cameraZoomStrength);
         }
         return fov;
     }
@@ -118,8 +118,8 @@ public class RhittaCinematics {
             return null;
         }
         Minecraft client = Minecraft.getInstance();
-        float t = (client.player == null ? 0 : client.player.tickCount) + partialTick;
-        return new float[]{shake * Mth.sin(t * 2.7F), shake * 0.8F * Mth.sin(t * 3.3F + 1.0F), shake * 0.6F * Mth.sin(t * 2.1F + 2.0F)};
+        float clientTickProgress = (client.player == null ? 0 : client.player.tickCount) + partialTick;
+        return new float[]{shake * Mth.sin(clientTickProgress * 2.7F), shake * 0.8F * Mth.sin(clientTickProgress * 3.3F + 1.0F), shake * 0.6F * Mth.sin(clientTickProgress * 2.1F + 2.0F)};
     }
 
     public static void renderOverlay(GuiGraphics context, float partialTick) {

@@ -163,7 +163,7 @@ public class BladeSkillEntity extends PhasedEffectEntity {
                 continue;
             }
             float part = (float) step / perTick;
-            Vec3 at = new Vec3(Mth.lerp(part, owner.xo, owner.getX()), Mth.lerp(part, owner.yo, owner.getY()),
+            Vec3 position = new Vec3(Mth.lerp(part, owner.xo, owner.getX()), Mth.lerp(part, owner.yo, owner.getY()),
                     Mth.lerp(part, owner.zo, owner.getZ()));
             float yaw = this.facing(owner, part);
             float time = (float) frame / perTick;
@@ -171,13 +171,13 @@ public class BladeSkillEntity extends PhasedEffectEntity {
                 if (hand == 1 && clip.leftSword == 0) {
                     continue;
                 }
-                Vec3 base = AbilityHelper.toWorld(clip.point(hand * 2 + 1, frame, local), at, yaw, mirror);
-                Vec3 tip = AbilityHelper.toWorld(clip.point(hand * 2, frame, local), at, yaw, mirror);
+                Vec3 base = AbilityHelper.toWorld(clip.point(hand * 2 + 1, frame, local), position, yaw, mirror);
+                Vec3 tip = AbilityHelper.toWorld(clip.point(hand * 2, frame, local), position, yaw, mirror);
                 this.trails[hand].add(base, tip, time, heat(skill, clip, hand, frame));
             }
             for (AnimationClip.Marker marker : clip.markers()) {
                 if (marker.frame() == frame) {
-                    this.marked(owner, skill, clip, marker, at, yaw, time);
+                    this.marked(owner, skill, clip, marker, position, yaw, time);
                 }
             }
         }
@@ -208,7 +208,7 @@ public class BladeSkillEntity extends PhasedEffectEntity {
         }
     }
 
-    private void marked(LivingEntity owner, BladeSkill skill, AnimationClip clip, AnimationClip.Marker marker, Vec3 at, float yaw,
+    private void marked(LivingEntity owner, BladeSkill skill, AnimationClip clip, AnimationClip.Marker marker, Vec3 position, float yaw,
                         float time) {
         String name = marker.name();
         boolean mirror = this.isMirror();
@@ -258,9 +258,9 @@ public class BladeSkillEntity extends PhasedEffectEntity {
                 for (int hand = 0; hand < 2; hand++) {
                     if (BladeSkillShapes.uses(marker, hand == 0 ? 'R' : 'L')) {
                         int blade = hand == 0 ? SlashMark.DARK : SlashMark.TEAL;
-                        this.marks.add(SlashMark.swing(clip, hand * 2, marker.frame(), window, at, yaw, mirror, settings.slashScale,
+                        this.marks.add(SlashMark.swing(clip, hand * 2, marker.frame(), window, position, yaw, mirror, settings.slashScale,
                                 blade, time));
-                        this.shards(at, look, (float) settings.reach, blade, time, marker.frame() + hand);
+                        this.shards(position, look, (float) settings.reach, blade, time, marker.frame() + hand);
                     }
                 }
             }
@@ -272,27 +272,27 @@ public class BladeSkillEntity extends PhasedEffectEntity {
         Vec3 flat = new Vec3(look.x, 0, look.z);
         Vec3 heart = feet.add(flat.lengthSqr() < 1.0E-4 ? Vec3.ZERO : flat.normalize().scale(reach * 0.4)).add(0, 1.3, 0);
         for (int i = 0; i < 5; i++) {
-            Vec3 at = heart.add((random.nextDouble() - 0.5) * reach, (random.nextDouble() - 0.4) * 2.6, (random.nextDouble() - 0.5) * reach);
+            Vec3 position = heart.add((random.nextDouble() - 0.5) * reach, (random.nextDouble() - 0.4) * 2.6, (random.nextDouble() - 0.5) * reach);
             Vec3 direction = new Vec3(random.nextDouble() - 0.5, (random.nextDouble() - 0.5) * 0.9, random.nextDouble() - 0.5).normalize();
-            this.marks.add(SlashMark.streak(at, direction, SlashWave.perpendicular(direction), reach * (0.9F + random.nextFloat()),
+            this.marks.add(SlashMark.streak(position, direction, SlashWave.perpendicular(direction), reach * (0.9F + random.nextFloat()),
                     0.16F + random.nextFloat() * 0.2F, blade, time + i * 0.5F, seed * 7 + i));
         }
         ParticleOptions own = blade == SlashMark.TEAL ? ParticlesRegistry.FROST_SHARD.get() : ParticlesRegistry.STAR_SPARK.get();
         for (int i = 0; i < 10; i++) {
-            Vec3 at = heart.add((random.nextDouble() - 0.5) * reach * 0.8, (random.nextDouble() - 0.4) * 2.0,
+            Vec3 position = heart.add((random.nextDouble() - 0.5) * reach * 0.8, (random.nextDouble() - 0.4) * 2.0,
                     (random.nextDouble() - 0.5) * reach * 0.8);
-            Vec3 speed = at.subtract(feet.add(0, 1.2, 0)).normalize().scale(0.25 + random.nextDouble() * 0.6);
-            this.level().addParticle(i % 3 == 0 ? ParticlesRegistry.CRIMSON_SPARK.get() : own, at.x, at.y, at.z, speed.x, speed.y, speed.z);
+            Vec3 speed = position.subtract(feet.add(0, 1.2, 0)).normalize().scale(0.25 + random.nextDouble() * 0.6);
+            this.level().addParticle(i % 3 == 0 ? ParticlesRegistry.CRIMSON_SPARK.get() : own, position.x, position.y, position.z, speed.x, speed.y, speed.z);
         }
     }
 
-    private void spray(Vec3 at, ParticleOptions particle, int count, double speed) {
+    private void spray(Vec3 position, ParticleOptions particle, int count, double speed) {
         RandomSource random = this.random;
         for (int i = 0; i < count; i++) {
             double yaw = random.nextDouble() * Mth.TWO_PI;
             double pitch = (random.nextDouble() - 0.5) * Math.PI;
             double pace = speed * (0.3 + random.nextDouble() * 0.7);
-            this.level().addParticle(particle, at.x, at.y, at.z, Math.cos(yaw) * Math.cos(pitch) * pace, Math.sin(pitch) * pace,
+            this.level().addParticle(particle, position.x, position.y, position.z, Math.cos(yaw) * Math.cos(pitch) * pace, Math.sin(pitch) * pace,
                     Math.sin(yaw) * Math.cos(pitch) * pace);
         }
     }
@@ -328,17 +328,17 @@ public class BladeSkillEntity extends PhasedEffectEntity {
                         Vec3 side = SlashWave.perpendicular(aim);
                         double angle = random.nextDouble() * Mth.TWO_PI;
                         Vec3 out = side.scale(Math.cos(angle)).add(aim.cross(side).scale(Math.sin(angle)));
-                        Vec3 at = origin.add(aim.scale(random.nextDouble() * length)).add(out.scale(radius * (0.4 + random.nextDouble() * 0.7)));
+                        Vec3 position = origin.add(aim.scale(random.nextDouble() * length)).add(out.scale(radius * (0.4 + random.nextDouble() * 0.7)));
                         Vec3 speed = out.scale(0.08 + random.nextDouble() * 0.2).add(aim.scale(0.25));
-                        world.addParticle(ParticlesRegistry.CRIMSON_SPARK.get(), at.x, at.y, at.z, speed.x, speed.y, speed.z);
+                        world.addParticle(ParticlesRegistry.CRIMSON_SPARK.get(), position.x, position.y, position.z, speed.x, speed.y, speed.z);
                     }
                 }
             }
             case HORIZONTAL_SQUARE -> {
                 // frost falling off the edges already drawn
                 for (int i = 0; i + 1 < this.corners.size() && this.releasedAt < 0; i++) {
-                    Vec3 at = this.corners.get(i).lerp(this.corners.get(i + 1), random.nextDouble());
-                    world.addParticle(ParticlesRegistry.FROST_SHARD.get(), at.x, at.y, at.z, (random.nextDouble() - 0.5) * 0.04,
+                    Vec3 position = this.corners.get(i).lerp(this.corners.get(i + 1), random.nextDouble());
+                    world.addParticle(ParticlesRegistry.FROST_SHARD.get(), position.x, position.y, position.z, (random.nextDouble() - 0.5) * 0.04,
                             -0.02, (random.nextDouble() - 0.5) * 0.04);
                 }
             }
@@ -389,7 +389,7 @@ public class BladeSkillEntity extends PhasedEffectEntity {
         if (this.finaleAt >= 0 && this.getPhaseTicks(0.0F) - this.finaleAt < 30) {
             spots.add(this.crossCenter);
         }
-        EffectLights.set(this, spots);
+        SimplyAnimeEffectLights.set(this, spots);
     }
 
     @Override
@@ -397,17 +397,11 @@ public class BladeSkillEntity extends PhasedEffectEntity {
         return true;
     }
 
-    //TODO Check for validity
-    @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        this.defineData(this.entityData::set);
-    }
-
     @Override
     public void onClientRemoval() {
         super.onClientRemoval();
         CLIENT_BY_OWNER.values().removeIf(visual -> visual == this);
         CLIENT_ACTIVE.remove(this);
-        EffectLights.clear(this);
+        SimplyAnimeEffectLights.clear(this);
     }
 }

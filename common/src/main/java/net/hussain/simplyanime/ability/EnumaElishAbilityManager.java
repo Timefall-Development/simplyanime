@@ -110,9 +110,9 @@ public class EnumaElishAbilityManager {
                 Callouts.send(world, actor.position(), Callout.ENUMA_ELISH);
             }
             if (elapsed % 4 == 0) {
-                float t = elapsed / (float) Math.max(1, release);
+                float tickProgress = elapsed / (float) Math.max(1, release);
                 world.sendParticles(ParticleTypes.FLAME, actor.getX(), actor.getY() + 0.1, actor.getZ(),
-                        2 + (int) (t * 6), 1.4, 0.05, 1.4, 0.01);
+                        2 + (int) (tickProgress * 6), 1.4, 0.05, 1.4, 0.01);
             }
             if (elapsed >= release) {
                 releaseBeam(world, cast, actor, visual, settings);
@@ -266,21 +266,21 @@ public class EnumaElishAbilityManager {
                 continue;
             }
 
-            Vec3 at = AbilityHelper.strike(world, actor, cast.ownerId, cast.stack, entity, root, damage);
-            if (at != null && blast) {
+            Vec3 strikePosition = AbilityHelper.strike(world, actor, cast.ownerId, cast.stack, entity, root, damage);
+            if (strikePosition != null && blast) {
                 if (!(root instanceof EnderDragon)) {
                     Vec3 push = cast.direction.scale(settings.beamKnockback);
                     root.push(push.x, push.y * 0.5 + 0.25 * settings.beamKnockback, push.z);
                     root.hurtMarked = true;
                 }
-                burst(world, at);
+                burst(world, strikePosition);
             }
         }
     }
 
-    private static void burst(ServerLevel world, Vec3 at) {
-        world.sendParticles(ParticlesRegistry.RUPTURE_EMBER.get(), at.x, at.y, at.z, 16, 0.4, 0.4, 0.4, 0.35);
-        world.sendParticles(ParticleTypes.FLASH, at.x, at.y, at.z, 1, 0, 0, 0, 0);
+    private static void burst(ServerLevel world, Vec3 position) {
+        world.sendParticles(ParticlesRegistry.RUPTURE_EMBER.get(), position.x, position.y, position.z, 16, 0.4, 0.4, 0.4, 0.35);
+        world.sendParticles(ParticleTypes.FLASH, position.x, position.y, position.z, 1, 0, 0, 0, 0);
     }
 
     private static boolean holdingSword(LivingEntity actor) {

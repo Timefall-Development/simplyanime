@@ -67,10 +67,10 @@ public class SimplyAnimeStandardRenderTypes extends RenderType {
     private static RenderType textured(String name, ResourceLocation texture,
                                        boolean smooth, boolean additive) {
         return RenderType.create(
-                name, DefaultVertexFormat.POSITION_COLOR_TEX,
+                name, DefaultVertexFormat.POSITION_TEX_COLOR,
                 VertexFormat.Mode.QUADS, BUFFER_SIZE, false, true,
                 CompositeState.builder()
-                        .setShaderState(POSITION_COLOR_TEX_SHADER)
+                        .setShaderState(ShaderStateShard.POSITION_TEX_SHADER)
                         .setTextureState(new TextureStateShard(texture, smooth, false))
                         .setTransparencyState(additive
                                 ? LIGHTNING_TRANSPARENCY : TRANSLUCENT_TRANSPARENCY)

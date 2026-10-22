@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
-public class EffectLights {
+public class SimplyAnimeEffectLights {
 
     private static final Map<Entity, Set<BlockPos>> LIGHTS = new WeakHashMap<>();
     private static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
@@ -30,20 +30,20 @@ public class EffectLights {
         for (Vec3 spot : spots) {
             wanted.add(BlockPos.containing(spot));
         }
-        Set<BlockPos> placed = LIGHTS.computeIfAbsent(owner, e -> new HashSet<>());
+        Set<BlockPos> placed = LIGHTS.computeIfAbsent(owner, entity -> new HashSet<>());
         Iterator<BlockPos> old = placed.iterator();
         while (old.hasNext()) {
-            BlockPos pos = old.next();
-            if (!wanted.contains(pos)) {
-                remove(world, pos);
+            BlockPos blockPos = old.next();
+            if (!wanted.contains(blockPos)) {
+                remove(world, blockPos);
                 old.remove();
             }
         }
         BlockState light = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15);
-        for (BlockPos pos : wanted) {
-            if (!placed.contains(pos) && world.getBlockState(pos).isAir()) {
-                world.setBlock(pos, light, FLAGS);
-                placed.add(pos);
+        for (BlockPos blockPos : wanted) {
+            if (!placed.contains(blockPos) && world.getBlockState(blockPos).isAir()) {
+                world.setBlock(blockPos, light, FLAGS);
+                placed.add(blockPos);
             }
         }
     }
@@ -51,15 +51,15 @@ public class EffectLights {
     public static void clear(Entity owner) {
         Set<BlockPos> placed = LIGHTS.remove(owner);
         if (placed != null) {
-            for (BlockPos pos : placed) {
-                remove(owner.level(), pos);
+            for (BlockPos blockPos : placed) {
+                remove(owner.level(), blockPos);
             }
         }
     }
 
-    private static void remove(Level world, BlockPos pos) {
-        if (world.getBlockState(pos).is(Blocks.LIGHT)) {
-            world.setBlock(pos, Blocks.AIR.defaultBlockState(), FLAGS);
+    private static void remove(Level world, BlockPos blockPos) {
+        if (world.getBlockState(blockPos).is(Blocks.LIGHT)) {
+            world.setBlock(blockPos, Blocks.AIR.defaultBlockState(), FLAGS);
         }
     }
 }

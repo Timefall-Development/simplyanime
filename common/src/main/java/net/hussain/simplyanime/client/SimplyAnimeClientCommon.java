@@ -1,31 +1,7 @@
+
 package net.hussain.simplyanime.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.hussain.simplyanime.Constants;
-import net.hussain.simplyanime.ability.RhittaGrowth;
-import net.hussain.simplyanime.client.pose.BladePoses;
-import net.hussain.simplyanime.client.pose.RhittaPoses;
-import net.hussain.simplyanime.client.renderer.*;
-import net.hussain.simplyanime.config.ClientConfig;
-import net.hussain.simplyanime.config.RhittaClientConfig;
-import net.hussain.simplyanime.item.AnimeWeaponItem;
-import net.hussain.simplyanime.item.EnumaElishItem;
-import net.hussain.simplyanime.registry.EntityRegistry;
 import net.hussain.simplyanime.registry.ParticlesRegistry;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.player.Input;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.EntityHitResult;
-import net.sweenus.simplyswords.client.api.SimplySwordsClientAPI;
 
 public class SimplyAnimeClientCommon {
     public static ClientHooks clientHooks = ClientHooks.NONE;
@@ -50,7 +26,7 @@ public class SimplyAnimeClientCommon {
 
 
 
-
+/*
     //TODO Remove if not necessary
     public interface RendererRegistrar {
         <T extends Entity> void register(EntityType<? extends T> type, EntityRendererProvider<T> provider);
@@ -140,4 +116,6 @@ public class SimplyAnimeClientCommon {
     public static void holdInput(Player player, Input input) {
         BladeCinematics.holdInput(player, input);
     }
+
+ */
 }

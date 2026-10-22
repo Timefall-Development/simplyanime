@@ -3,9 +3,9 @@ package net.hussain.simplyanime.client.renderer;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -33,8 +33,7 @@ public final class VfxBuffer {
         return new VfxBuffer(consumers.getBuffer(layer), layer.format(), SimplyAnimeRenderTypes.isSolid(layer));
     }
 
-    public void vertex(VertexConsumer consumer, Matrix4f matrix, float x, float y, float z,
-                       int r, int g, int b, int a, float u, float v, int light, float nx, float ny, float nz) {
+    public void vertex(Matrix4f matrix, float x, float y, float z, int r, int g, int b, int a, float u, float v) {
         if (this.gain != 1.0F) {
             r = Math.min(255, (int) (r * this.gain));
             g = Math.min(255, (int) (g * this.gain));
@@ -44,9 +43,8 @@ public final class VfxBuffer {
             consumer.addVertex(matrix, x, y, z)
                     .setColor(r, g, b, a)
                     .setUv(u, v)
-                    .setOverlay(OverlayTexture.NO_OVERLAY)
-                    .setLight(light)
-                    .setNormal(nx, ny, nz);
+                    .setLight(LightTexture.FULL_BRIGHT)
+                    .setNormal(0.0F, 1.0F, 0.0F);
         } else if (this.textured) {
             consumer.addVertex(matrix, x, y, z)
                     .setColor(r, g, b, a)

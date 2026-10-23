@@ -11,10 +11,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.hussain.simplyanime.SimplyAnimeFabric"
+      "net.ghostedhype.simplyanime.SimplyAnimeFabric"
     ],
     "client": [
-      "net.hussain.simplyanime.client.SimplyAnimeFabricClient"
+      "net.ghostedhype.simplyanime.client.SimplyAnimeFabricClient"
     ]
   },
   "mixins": [
